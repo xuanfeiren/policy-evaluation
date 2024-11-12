@@ -22,7 +22,7 @@ gamma = 0.95 # discounting factor
 
 # Set random seed for reproducibility
 seed = np.random.randint(0, 10000)
-seed = 2153 # BRM has larger bound on this seed
+# seed = 2153 # BRM has larger bound on this seed
 np.random.seed(seed)
 # print(f"Random seed: {seed}")
 
