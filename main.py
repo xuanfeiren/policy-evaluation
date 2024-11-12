@@ -36,20 +36,31 @@ D = np.diag(d)
 P = np.random.random((s, s))
 P = P / P.sum(axis=1)[:, np.newaxis]  # Normalize rows to sum to 1
 
+# Generate a deterministic transition matrix P
+P = np.zeros((s, s))
+for i in range(s):
+    next_state = np.random.choice(s)
+    P[i, next_state] = 1
 # Random generate Phi as a sxd matrix
 Phi = np.random.uniform(-10, 10, size=(s, feature_dim))
-R = np.random.uniform(-10, 10, size=(s, 1))
 # Compute M = I - gamma * P
 I = np.eye(s)
 M = I - gamma * P
 # Compute v = (I - gamma * P)^(-1) * R
 
-v = np.linalg.inv(I - gamma * P) @ R
+theta_real = np.random.uniform(-10, 10, size=(feature_dim, 1))
+v = Phi @ theta_real 
+v += 1e-3 * np.random.randn(*v.shape)  # Add small noise to v
+R = v - gamma * (P @ v)
+# v = np.linalg.inv(I - gamma * P) @ R
 # print("Real value function v:", v)
 # Number of data points
 
+# Find theta_star to minimize ||Phi * theta - v||_2
+theta_star = np.linalg.inv(Phi.T @ Phi) @ Phi.T @ v
+v_star = Phi @ theta_star
 
-n = 1000
+n = 10000
 # Generate data
 data = []
 for _ in range(n):
@@ -79,7 +90,30 @@ D
 l2_norm_diff_BRM_list = []
 l2_norm_diff_LSTD_list = []
 
-iter = int(n/10)
+# Calculate real covariance matrices using the real distribution d and transition matrix P
+Sigma_cov_real = np.zeros((feature_dim, feature_dim))
+for i in range(s):
+    Sigma_cov_real += d[i] * np.outer(Phi[i], Phi[i])
+
+Sigma_cr_real = np.zeros((feature_dim, feature_dim))
+for i in range(s):
+    for j in range(s):
+        Sigma_cr_real += d[i] * P[i, j] * np.outer(Phi[i], Phi[j])
+
+Sigma_next_real = np.zeros((feature_dim, feature_dim))
+for i in range(s):
+    for j in range(s):
+        Sigma_next_real += d[i] * P[i,j] * np.outer(Phi[j], Phi[j])
+
+theta_phi_r_real = np.zeros((feature_dim, 1))
+for i in range(s):
+    theta_phi_r_real += d[i] * (Phi[i][:, np.newaxis] * R[i])
+
+theta_phi_prime_r_real = np.zeros((feature_dim, 1))
+for i in range(s):
+    for j in range(s):
+        theta_phi_prime_r_real += d[i] * P[i, j] * (Phi[j][:, np.newaxis] * R[i])
+iter = int(n/50)
 # Loop over different sizes of data from 100 to 10000 in steps of 100
 for m in range(iter, n + 1, iter):
     # Use first m data points
@@ -116,7 +150,10 @@ for m in range(iter, n + 1, iter):
     # BRM estimator for first m data points
     theta_hat_BRM_m = np.linalg.inv(Sigma_cov_m - gamma * Sigma_cr_m - gamma * Sigma_cr_m.T + gamma**2 * Sigma_next_m) @ (theta_phi_r_m - gamma * theta_phi_prime_r_m)
     v_hat_BRM_m = Phi @ theta_hat_BRM_m
+    
+
     l2_norm_diff_BRM_m = np.linalg.norm(v - v_hat_BRM_m, ord=2)
+
     l2_norm_diff_BRM_list.append(l2_norm_diff_BRM_m)
     
     # LSTD estimator for first m data points
@@ -125,10 +162,28 @@ for m in range(iter, n + 1, iter):
     l2_norm_diff_LSTD_m = np.linalg.norm(v - v_hat_LSTD_m, ord=2)
     l2_norm_diff_LSTD_list.append(l2_norm_diff_LSTD_m)
 
+# estimator with infinite data points
+theta_hat_BRM_real = np.linalg.inv(Sigma_cov_real - gamma * Sigma_cr_real - gamma * Sigma_cr_real.T + gamma**2 * Sigma_next_real) @ (theta_phi_r_real - gamma * theta_phi_prime_r_real)
+v_har_BRM_real = Phi @ theta_hat_BRM_real
+Loss_BRM_real = np.linalg.norm(v - v_har_BRM_real, ord=2)
+
+theta_hat_LSTD_real = np.linalg.inv(Sigma_cov_real - gamma * Sigma_cr_real) @ (theta_phi_r_real)
+v_hat_LSTD_real = Phi @ theta_hat_LSTD_real
+Loss_LSTD_real = np.linalg.norm(v - v_hat_LSTD_real, ord=2)
+
+Loss_oracle = Loss_v_star = np.linalg.norm(v - v_star, ord=2)
+alpha_LSTD = Loss_LSTD_real/Loss_oracle
+alpha_BRM = Loss_BRM_real/Loss_oracle
 # Plot loss curves
 plt.figure(figsize=(10, 6))
-plt.plot(range(iter, n + 1, iter), l2_norm_diff_BRM_list, label='BRM Loss')
-plt.plot(range(iter, n + 1, iter), l2_norm_diff_LSTD_list, label='LSTD Loss')
+plt.text(n, Loss_LSTD_real, f'alpha_LSTD = {alpha_LSTD:.2f}', color='blue', verticalalignment='bottom')
+plt.text(n, Loss_BRM_real, f'alpha_BRM = {alpha_BRM:.2f}', color='red', verticalalignment='bottom')
+plt.plot(range(iter, n + 1, iter), l2_norm_diff_BRM_list, label='BRM Loss', color='red')
+plt.plot(range(iter, n + 1, iter), l2_norm_diff_LSTD_list, label='LSTD Loss', color='blue')
+plt.axhline(y=Loss_BRM_real, color='red', linestyle='--', label='BRM  Loss with infinite data')
+plt.axhline(y=Loss_LSTD_real, color='blue', linestyle='--', label='LSTD  Loss with infinite data')
+plt.axhline(y=Loss_oracle, color='green', linestyle='--', label='Oracle Loss with Linear FA')
+
 plt.xlabel('Number of Data Points')
 plt.ylabel('L2 Norm Difference')
 plt.title('Loss Curves for BRM and LSTD')
