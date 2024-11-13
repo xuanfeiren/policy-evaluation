@@ -20,8 +20,8 @@ s = 5  # Size of P and Phi
 feature_dim = 2 # Feature dimension
 
 # Set random seed for reproducibility
-seed = np.random.randint(0, 10000)
-seed = 2153 # BRM has smaller bound on this seed
+# seed = np.random.randint(0, 10000)
+seed = 5002 # BRM has smaller bound on this seed
 np.random.seed(seed)
 print(f"Random seed: {seed}")
 
@@ -32,12 +32,21 @@ d = d / np.sum(d)  # Normalize to sum to 1
 D = np.diag(d)
 
 # Randomly generate P as a s*s stochastic matrix with positive entries (each row sums to 1)
-P = np.random.random((s, s))
-P = P / P.sum(axis=1)[:, np.newaxis]  # Normalize rows to sum to 1
+# P = np.random.random((s, s))
+# P = P / P.sum(axis=1)[:, np.newaxis]  # Normalize rows to sum to 1
 
 # Random generate Phi as a sxd matrix
 Phi = np.random.uniform(-10, 10, size=(s, feature_dim))
-R = np.random.uniform(-10, 10, size=(s, 1))
+P = np.zeros((s, s))
+for i in range(s):
+    next_state = np.random.choice(s)
+    P[i, next_state] = 1
+# Compute M = I - gamma * P
+
+# Compute v = (I - gamma * P)^(-1) * R
+
+
+# R = np.random.uniform(-10, 10, size=(s, 1))
 
 # Create arrays to store results for different gamma values
 gamma_values = np.linspace(0, 0.99, 100)
