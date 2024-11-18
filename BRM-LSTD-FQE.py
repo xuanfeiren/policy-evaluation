@@ -113,7 +113,7 @@ Loss_LSTD_real = np.linalg.norm(Q - Q_hat_LSTD_real, ord=2)
 alpha_LSTD = Loss_LSTD_real/Loss_oracle
 alpha_BRM = Loss_BRM_real/Loss_oracle
 
-repeat = 30
+repeat = 5
 '''Generate data'''
 n = 10000
 num_FQI = 50
@@ -231,7 +231,7 @@ loss_LSTD = [value / repeat for value in loss_LSTD]
 loss_BRM = [value / repeat for value in loss_BRM]
 loss_BRM_SGD = [value / repeat for value in loss_BRM_SGD]
 loss_FQI = [value / repeat for value in loss_FQI]
-print(loss_FQI)
+# print(loss_FQI)
 
 
 # Plot loss curves with log scale on y axis
@@ -242,7 +242,7 @@ plt.text(n, Loss_BRM_real, f'alpha_BRM = {alpha_BRM:.2f}', color='red', vertical
 plt.plot(range(iter, n + 1, iter), loss_FQI, label='FQI Loss', color='black')
 plt.plot(range(iter, n + 1, iter), loss_BRM, label='BRM Loss', color='red')
 plt.plot(range(iter, n + 1, iter), loss_BRM_SGD, label='BRM_SGD Loss', color='magenta')
-plt.plot(range(iter, n + 1, iter), loss_LSTD,linestyle='--', label='LSTD Loss', color='yellow')
+plt.plot(range(iter, n + 1, iter), loss_LSTD,linestyle='--', label='LSTD Loss', color='blue')
 plt.axhline(y=Loss_BRM_real, color='red', linestyle='--', label='BRM  Loss with infinite data')
 plt.axhline(y=Loss_LSTD_real, color='blue', linestyle='--', label='LSTD  Loss with infinite data')
 plt.axhline(y=Loss_oracle, color='green', linestyle='--', label='Oracle Loss with Linear FA')
