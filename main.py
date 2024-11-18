@@ -4,17 +4,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 # Helper function to calculate operator norm (maximum singular value)
 
-def operator_norm(matrix):
-    return np.linalg.norm(matrix, ord=2)  # 2-norm is the operator norm
 
-def mu_operator_norm(matrix, D):
-    # Calculate D^(1/2) and D^(-1/2) using scipy's matrix square root
-    D_sqrt = sqrtm(D)
-    D_neg_sqrt = sqrtm(np.linalg.inv(D))
-    
-    # Calculate weighted norm
-    matrix = D_sqrt @ matrix @ D_neg_sqrt
-    return np.linalg.norm(matrix, ord=2)
 
 # Parameters
 
@@ -97,8 +87,8 @@ for i in range(s):
 '''estimator with infinite data points'''
 
 theta_hat_BRM_real = np.linalg.inv(Sigma_cov_real - gamma * Sigma_cr_real - gamma * Sigma_cr_real.T + gamma**2 * Sigma_next_real) @ (theta_phi_r_real - gamma * theta_phi_prime_r_real)
-v_har_BRM_real = Phi @ theta_hat_BRM_real
-Loss_BRM_real = np.linalg.norm(v - v_har_BRM_real, ord=2)
+v_hat_BRM_real = Phi @ theta_hat_BRM_real
+Loss_BRM_real = np.linalg.norm(v - v_hat_BRM_real, ord=2)
 theta_hat_LSTD_real = np.linalg.inv(Sigma_cov_real - gamma * Sigma_cr_real) @ (theta_phi_r_real)
 v_hat_LSTD_real = Phi @ theta_hat_LSTD_real
 Loss_LSTD_real = np.linalg.norm(v - v_hat_LSTD_real, ord=2)
