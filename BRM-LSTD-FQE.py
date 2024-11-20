@@ -242,7 +242,7 @@ plt.text(n, Loss_BRM_real, f'alpha_BRM = {alpha_BRM:.2f}', color='red', vertical
 plt.plot(range(iter, n + 1, iter), loss_FQI, label='FQI Loss', color='black')
 plt.plot(range(iter, n + 1, iter), loss_BRM, label='BRM Loss', color='red')
 plt.plot(range(iter, n + 1, iter), loss_BRM_SGD, label='BRM_SGD Loss', color='magenta')
-plt.plot(range(iter, n + 1, iter), loss_LSTD,linestyle='--', label='LSTD Loss', color='blue')
+plt.plot(range(iter, n + 1, iter), loss_LSTD,linestyle='-.', label='LSTD Loss', color='blue')
 plt.axhline(y=Loss_BRM_real, color='red', linestyle='--', label='BRM  Loss with infinite data')
 plt.axhline(y=Loss_LSTD_real, color='blue', linestyle='--', label='LSTD  Loss with infinite data')
 plt.axhline(y=Loss_oracle, color='green', linestyle='--', label='Oracle Loss with Linear FA')
