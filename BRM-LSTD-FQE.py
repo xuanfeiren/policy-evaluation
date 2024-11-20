@@ -121,6 +121,7 @@ iter = int( n / 100 )
 loss_LSTD = [0] * int(n / iter)
 loss_BRM = [0] * int(n / iter)
 loss_BRM_SGD = [0] * int(n / iter)
+loss_TD0 = [0] * int(n / iter)
 loss_FQI = [0] * int(n / iter)
 
 for _ in tqdm(range(repeat)):
@@ -207,11 +208,15 @@ for _ in tqdm(range(repeat)):
     # Initialize theta for SGD
     theta_sgd = np.random.randn(feature_dim, 1)
     learning_rate = 0.01
-
     l2_norm_diff_SGD_list = []
+
+    theta_TD0 = np.random.randn(feature_dim, 1)
+    alpha = 0.1
+    l2_norm_diff_TD0_list = []
 
     for m in range(iter, n + 1, iter):
         for i in range(m - iter, m):
+            '''SGD update for BRM'''
             phi_i = phi_sa[i][:, np.newaxis]
             r_i = r_sa[i]
             phi_i_prime = phi_sa_prime[i][:, np.newaxis]
@@ -219,18 +224,25 @@ for _ in tqdm(range(repeat)):
             
             gradient = -2 * (r_i - np.dot(x_i.T, theta_sgd)) * x_i
             theta_sgd -= learning_rate * gradient
+            '''TD(0) update'''
+            theta_TD0 += alpha * (r_i + gamma * np.dot(phi_i_prime.T, theta_TD0) - np.dot(phi_i.T, theta_TD0)) * phi_i
         
         Q_hat_SGD_m = Phi @ theta_sgd
         l2_norm_diff_SGD_m = np.linalg.norm(Q - Q_hat_SGD_m, ord=2)
         l2_norm_diff_SGD_list.append(l2_norm_diff_SGD_m)
-    loss_BRM_SGD = [a + b for a, b in zip(loss_BRM_SGD, l2_norm_diff_SGD_list)]
 
+        Q_hat_TD0_m = Phi @ theta_TD0
+        l2_norm_diff_TD0_m = np.linalg.norm(Q - Q_hat_TD0_m, ord=2)
+        l2_norm_diff_TD0_list.append(l2_norm_diff_TD0_m)
+    loss_BRM_SGD = [a + b for a, b in zip(loss_BRM_SGD, l2_norm_diff_SGD_list)]
+    loss_TD0 = [a + b for a, b in zip(loss_TD0, l2_norm_diff_TD0_list)]
 
 
 loss_LSTD = [value / repeat for value in loss_LSTD]
 loss_BRM = [value / repeat for value in loss_BRM]
 loss_BRM_SGD = [value / repeat for value in loss_BRM_SGD]
 loss_FQI = [value / repeat for value in loss_FQI]
+loss_TD0 = [value / repeat for value in loss_TD0]
 # print(loss_FQI)
 
 
@@ -239,6 +251,7 @@ loss_FQI = [value / repeat for value in loss_FQI]
 plt.figure(figsize=(10, 6))
 plt.text(n, Loss_LSTD_real, f'alpha_LSTD = {alpha_LSTD:.2f}', color='blue', verticalalignment='bottom')
 plt.text(n, Loss_BRM_real, f'alpha_BRM = {alpha_BRM:.2f}', color='red', verticalalignment='bottom')
+plt.plot(range(iter, n + 1, iter), loss_TD0, linestyle= ':',label='TD(0) Loss', color='darkblue')
 plt.plot(range(iter, n + 1, iter), loss_FQI, label='FQI Loss', color='black')
 plt.plot(range(iter, n + 1, iter), loss_BRM, label='BRM Loss', color='red')
 plt.plot(range(iter, n + 1, iter), loss_BRM_SGD, label='BRM_SGD Loss', color='magenta')
@@ -253,4 +266,5 @@ plt.yscale('log')
 plt.title('Loss Curves for BRM and LSTD')
 plt.legend()
 plt.grid(True)
+# plt.savefig('plot_image.pdf', bbox_inches='tight')          # Save as PDF
 plt.show()
