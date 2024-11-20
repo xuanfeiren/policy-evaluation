@@ -113,11 +113,11 @@ Loss_LSTD_real = np.linalg.norm(Q - Q_hat_LSTD_real, ord=2)
 alpha_LSTD = Loss_LSTD_real/Loss_oracle
 alpha_BRM = Loss_BRM_real/Loss_oracle
 
-repeat = 5
+repeat = 30
 '''Generate data'''
 n = 10000
-num_FQI = 50
-iter = int( n / 100 )
+num_FQI = 30
+iter = int( n / 50 )
 loss_LSTD = [0] * int(n / iter)
 loss_BRM = [0] * int(n / iter)
 loss_BRM_SGD = [0] * int(n / iter)
@@ -266,5 +266,5 @@ plt.yscale('log')
 plt.title('Loss Curves for BRM and LSTD')
 plt.legend()
 plt.grid(True)
-# plt.savefig('plot_image.pdf', bbox_inches='tight')          # Save as PDF
+plt.savefig('plot_image.pdf', bbox_inches='tight')          # Save as PDF
 plt.show()
