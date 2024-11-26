@@ -266,5 +266,6 @@ plt.yscale('log')
 plt.title('Loss Curves for BRM and LSTD')
 plt.legend()
 plt.grid(True)
-plt.savefig('plot_image.pdf', bbox_inches='tight')          # Save as PDF
+plt.savefig(f'plot_image_s{s}_a{num_actions}_gamma{gamma}_n{n}_repeat{repeat}.pdf', bbox_inches='tight')  # Save as PDF with parameters
+# plt.savefig('plot_image.pdf', bbox_inches='tight')          # Save as PDF
 plt.show()
