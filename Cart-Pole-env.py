@@ -19,7 +19,7 @@ def policy_unif(s):
   return a
 
 def policy_PPO(s):
-  action, _states = model_PPO.predict(s)
+  action = model_PPO.predict(s)[0]
   return action
 
 def compute_return(traj,gamma):
@@ -51,7 +51,7 @@ def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length
     return feature
 
 def collect_trajectory(policy, feature_dim):
-    s0 = env.reset()
+    s0, _ = env.reset()
     traj_list = [s0]
     while True:
         a0 = policy(s0)
