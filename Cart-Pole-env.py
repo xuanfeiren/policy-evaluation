@@ -8,8 +8,9 @@ from stable_baselines3 import PPO
 model_PPO = PPO.load("ppo_cartpole")
 env_name = 'CartPole-v1'
 n_samples = 30000
-feature_dim = 100  # Example feature dimension
-repeat = 5
+feature_dim = 84 # Example feature dimension
+# feature_dim = 84 is the best dimension for CartPole-v1 with 30000 samples, 3 grid points, and 0.9 discount factor and random seed 0 in the random feature function
+repeat = 1
 gamma = 0.9
 num_grids = 3
 
@@ -247,6 +248,8 @@ for _ in tqdm(range(repeat)):
     loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
 loss_LSTD = [value / repeat for value in loss_LSTD]
 loss_BRM = [value / repeat for value in loss_BRM]
+
+
 
 plt.figure(figsize=(10, 6))
 plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
