@@ -127,7 +127,7 @@ loss_FQI = [0] * int(n / iter)
 for _ in tqdm(range(repeat)):
     data = []
     for _ in range(n):
-        state_action = np.random.choice(s*num_actions, p = d)
+        state_action = np.random.choice(s*num_actions, p = d) #offline dataset, maybe not related to pi
         phi_sa = Phi[state_action]
         noise = np.random.normal(0, 1)
         noise = 0
