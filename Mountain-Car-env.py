@@ -1,17 +1,21 @@
+# Mountain-Car-env.py
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from stable_baselines3 import PPO
+from scipy.optimize import minimize
 
+model_PPO = PPO.load("ppo_mountaincar")
 
-model_PPO = PPO.load("ppo_cartpole")
-env_name = 'CartPole-v1'
+env_name = 'MountainCar-v0'
+gym.make(env_name)
+
 n_samples = 10000
-feature_dim = 200 # Example feature dimension
-repeat = 5
+feature_dim = 50 # Example feature dimension
+repeat = 1
 gamma = 0.9
-num_grids = 3
+num_grids = 6 # need to be changed in different environment
 
 env = gym.make(env_name)
 env.reset()
@@ -24,8 +28,8 @@ def policy_PPO(s):
   action = model_PPO.predict(s)[0]
   return action
 
-def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length_scale=1):
-    if len(state) != 4:
+def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length_scale=1.0):
+    if len(state) != 2:
         raise ValueError("State length must be 4")
     np.random.seed(0)
     state_array = np.array(state, dtype=np.float32).reshape(-1)
@@ -89,7 +93,7 @@ def Q(state, action, theta,feature_dim=feature_dim):
     phi_sa = rbf_random_fourier_features(state, action, feature_dim)
     return np.dot(theta, phi_sa)
 
-def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=0.1):
+def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=0.01):
     '''Use TD(0) which converges to the solution of LSTD'''
     theta_lstd = np.copy(theta_init)
     for phi_sa, reward, phi_sa_prime in data:
@@ -119,46 +123,40 @@ def policy_eval_BRM(theta_init, data,  feature_dim=feature_dim, learning_rate=0.
 
 def index_to_state_action(i, n_grid_points=num_grids):
     """
-    Maps index i (0 to 2*n_grid_points^4-1) to a state-action pair
+    Maps index i (0 to 3*n_grid_points^2-1) to a state-action pair
     
     Returns:
-    - state: np.array of shape (4,)
-    - action: int (0 or 1)
+    - state: np.array of shape (2,)
+    - action: int (0, 1, or 2)
     """
     # State bounds
     state_bounds = [
-        [-4.8, 4.8],     # cart position
-        [-10.0, 10.0],   # cart velocity
-        [-0.418, 0.418], # pole angle
-        [-10.0, 10.0]    # pole angular velocity
+        [-1.2, 0.6],     # position
+        [-0.07, 0.07]    # velocity
     ]
     
     # Total states per dimension
-    n_states = n_grid_points**4
+    n_states = n_grid_points**2
     
-    # Determine action (0 for first half indices, 1 for second half)
-    action = 1 if i>= n_states else 0
+    # Determine action (0 for first third indices, 1 for second third, 2 for last third)
+    action = i // n_states
     
     # Get state index (map back to state space)
     state_idx = i % n_states
     
     # Convert to grid coordinates
-    idx_4 = state_idx % n_grid_points
-    idx_3 = (state_idx // n_grid_points) % n_grid_points
-    idx_2 = (state_idx // (n_grid_points**2)) % n_grid_points
-    idx_1 = state_idx // (n_grid_points**3)
+    idx_2 = state_idx % n_grid_points
+    idx_1 = state_idx // n_grid_points
     
     # Convert grid coordinates to actual state values
     state = np.array([
         np.linspace(state_bounds[0][0], state_bounds[0][1], n_grid_points)[idx_1],
-        np.linspace(state_bounds[1][0], state_bounds[1][1], n_grid_points)[idx_2],
-        np.linspace(state_bounds[2][0], state_bounds[2][1], n_grid_points)[idx_3],
-        np.linspace(state_bounds[3][0], state_bounds[3][1], n_grid_points)[idx_4]
+        np.linspace(state_bounds[1][0], state_bounds[1][1], n_grid_points)[idx_2]
     ])
     
     return state, action
 
-def grid_evaluation_pairs(policy, num_grids = num_grids, n_episodes=100, max_steps=500):
+def grid_evaluation_pairs(policy, num_grids = num_grids, n_episodes=100, max_steps=200):
     """
     Estimates Q values using given policy for trajectories
     
@@ -171,8 +169,8 @@ def grid_evaluation_pairs(policy, num_grids = num_grids, n_episodes=100, max_ste
     Returns:
         Q_vector: Estimated Q-values for each state-action pair
     """
-    env = gym.make('CartPole-v1')
-    total_pairs = 2 * num_grids**4
+    env = gym.make('MountainCar-v0')
+    total_pairs = 3 * num_grids**2 
     Q_vector = np.zeros(total_pairs)
     
     for i in tqdm(range(total_pairs)):
@@ -212,23 +210,38 @@ def grid_evaluation_pairs(policy, num_grids = num_grids, n_episodes=100, max_ste
 
 def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
     loss = 0 
-    total_pairs = 2 * num_grids**4
+    total_pairs = 3 * num_grids**2 # need to be changed in different environment
     for i in range(total_pairs):
         state, action = index_to_state_action(i, num_grids)
         Q_est_i = Q(state, action, theta)
         loss += (Q_est_i- Q_real[i])**2
-        print(Q_est_i)
     loss /= total_pairs
+    # print('Q_est_i:', Q_est_i), print('Q_real:', Q_real[i])
     return loss
 
-# Q_real = grid_evaluation_pairs(policy_PPO)
-# np.save(f"Q_function_grid_3.npy", Q_real)
 
-Q_real = np.load(f"Q_function_grid_3.npy")
+Q_real = np.load(f"Q_function_Mountain_car_grid_6.npy")
+
+# Define the objective function for optimization
+# def objective_function(theta):
+#     return loss_policy_evaluation(theta, Q_real, num_grids)
+
+# # Initial guess for theta_oracle
+# theta_init = np.zeros(feature_dim)
+
+# # Perform the optimization to find theta_oracle
+# result = minimize(objective_function, theta_init, method='BFGS')
+
+# # Extract the optimized theta_oracle
+# theta_oracle = result.x
+
+# Print the optimized theta_oracle and the corresponding loss
+
+
 iter = int( n_samples / 50 )
 loss_LSTD = [0] * int(n_samples/ iter)
 loss_BRM = [0] * int(n_samples/ iter)
-total_pairs = 2 * num_grids**4
+total_pairs = 3 * num_grids**2 # need to be changed in different environment
 
 for _ in tqdm(range(repeat)):
     l2_norm_diff_BRM_list = []
@@ -250,10 +263,10 @@ for _ in tqdm(range(repeat)):
     loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
 loss_LSTD = [value / repeat for value in loss_LSTD]
 loss_BRM = [value / repeat for value in loss_BRM]
-
-
+# loss_oracle = loss_policy_evaluation(theta_oracle, Q_real)
 
 plt.figure(figsize=(10, 6))
+# plt.axhline(y=loss_oracle, color='green', linestyle='--', label='Oracle Loss')
 plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
 plt.plot(range(iter, n_samples + 1, iter), loss_LSTD, label='LSTD Loss', color='blue')
 plt.xlabel('Number of Data Points')
@@ -264,6 +277,3 @@ plt.legend()
 plt.grid(True)
 plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
 plt.show()
-
-
-
