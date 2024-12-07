@@ -1,15 +1,19 @@
+from importlib.metadata import PathDistribution
+from re import S
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from stable_baselines3 import PPO
 
+from scipy.optimize import minimize
+
 
 model_PPO = PPO.load("ppo_cartpole")
 env_name = 'CartPole-v1'
-n_samples = 10000
-feature_dim = 200 # Example feature dimension
-repeat = 5
+n_samples = 100000
+feature_dim = 100 # Example feature dimension
+repeat = 1
 gamma = 0.9
 num_grids = 3
 
@@ -24,7 +28,42 @@ def policy_PPO(s):
   action = model_PPO.predict(s)[0]
   return action
 
+def policy_mix(mix=0.75):
+    """
+    Creates a policy function with fixed mix parameter
+    
+    Args:
+        mix: Probability of using PPO policy (default 0.75)
+    
+    Returns:
+        Function that takes only state parameter
+    """
+    def policy(s):
+        if np.random.rand() < mix:
+            return policy_PPO(s)
+        else:
+            return policy_unif(s)
+    return policy
+
+def fourier_features(state, action, feature_dim = feature_dim, length_scale=1.0):
+    # np.random.seed(0)
+    state_array = np.array(state, dtype=np.float32).reshape(-1)
+    action_array = np.array([int(action)])
+    state_action = np.concatenate((state_array, action_array))
+    dim = state_action.shape[0]
+    omega = np.zeros((dim, feature_dim))
+    
+    for j in range(feature_dim):
+        # Create frequency multipliers that increase with column index
+        freq = (j + 1) * np.pi
+        # Fill column with increasing frequencies for each dimension
+        for i in range(dim):
+            omega[i,j] = freq * (i + 1)
+    feature =  np.cos( state_action @ omega)
+    return feature
+
 def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length_scale=1):
+    # return fourier_features(state, action, feature_dim, length_scale)
     if len(state) != 4:
         raise ValueError("State length must be 4")
     np.random.seed(0)
@@ -64,18 +103,18 @@ def collect_trajectory(policy, feature_dim):
     # print(len(traj_list))
     return traj_list[:-1]  # removing the terminal state
 
-def collect_data(n, policy, feature_dim=feature_dim):
+def collect_data(n,policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
     data = []
     while len(data) < n:
-        trajectory = collect_trajectory(policy, feature_dim)
+        trajectory = collect_trajectory(policy_to_gen_data, feature_dim)
         i = 0
         while i < len(trajectory)-3:
             state = trajectory[i]
-            action = policy(state)
-            phi_sa = rbf_random_fourier_features(state, action, feature_dim)
+            # action = policy(state)
+            phi_sa = trajectory[i+1]
             reward = trajectory[i+2]
             next_state = trajectory[i+3]
-            next_action = policy(next_state)
+            next_action = policy_to_eval(next_state)
             phi_sa_prime = rbf_random_fourier_features(next_state, next_action, feature_dim)
             
             data.append((phi_sa, reward, phi_sa_prime))
@@ -89,7 +128,7 @@ def Q(state, action, theta,feature_dim=feature_dim):
     phi_sa = rbf_random_fourier_features(state, action, feature_dim)
     return np.dot(theta, phi_sa)
 
-def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=0.1):
+def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=1):
     '''Use TD(0) which converges to the solution of LSTD'''
     theta_lstd = np.copy(theta_init)
     for phi_sa, reward, phi_sa_prime in data:
@@ -104,11 +143,11 @@ def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=0.1):
     
     return theta_lstd
 
-def policy_eval_BRM(theta_init, data,  feature_dim=feature_dim, learning_rate=0.1):
+def policy_eval_BRM(theta_init, data,  feature_dim=feature_dim, learning_rate=1):
     theta_BRM = np.copy(theta_init)
     for phi_sa, reward, phi_sa_prime in data:
         x_sa = phi_sa - gamma * phi_sa_prime
-        gradient = -2 * (reward - np.dot(x_sa, theta_BRM)) * x_sa
+        gradient = 2 * (np.dot(x_sa, theta_BRM) - reward) * x_sa
         theta_BRM -= learning_rate * gradient
         
     # def Q(state, action):
@@ -210,6 +249,8 @@ def grid_evaluation_pairs(policy, num_grids = num_grids, n_episodes=100, max_ste
     env.close()
     return Q_vector
 
+
+
 def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
     loss = 0 
     total_pairs = 2 * num_grids**4
@@ -217,53 +258,94 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
         state, action = index_to_state_action(i, num_grids)
         Q_est_i = Q(state, action, theta)
         loss += (Q_est_i- Q_real[i])**2
-        print(Q_est_i)
+        # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
+    
     loss /= total_pairs
     return loss
 
-# Q_real = grid_evaluation_pairs(policy_PPO)
-# np.save(f"Q_function_grid_3.npy", Q_real)
+def more_loss_policy_evaluation(theta,  num_grids ):
+    loss = 0 
+    total_pairs = 2 * num_grids**4
+    for i in range(total_pairs):
+        state, action = index_to_state_action(i, num_grids)
+        Q_est_i = Q(state, action, theta)
+        loss += (Q_est_i- 10)**2
+        # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
+    loss /= total_pairs
+    return loss
 
-Q_real = np.load(f"Q_function_grid_3.npy")
-iter = int( n_samples / 50 )
-loss_LSTD = [0] * int(n_samples/ iter)
-loss_BRM = [0] * int(n_samples/ iter)
-total_pairs = 2 * num_grids**4
-
-for _ in tqdm(range(repeat)):
-    l2_norm_diff_BRM_list = []
-    l2_norm_diff_LSTD_list = []
-    theta_lstd = np.zeros(feature_dim)
-    theta_BRM = np.zeros(feature_dim)
-    for m in range(iter, n_samples + 1, iter):
+def find_optimal_theta(feature_dim, num_grids=4):
+    theta_init = np.zeros(feature_dim)
+    pbar = tqdm(total=105000, desc='Optimizing theta')
+    n_evals = 0
+    
+    def objective_with_progress(theta):
+        nonlocal n_evals
+        n_evals += 1
+        pbar.update(1)
+        return more_loss_policy_evaluation(theta, num_grids)
+    
+    try:
+        result = minimize(
+            fun=objective_with_progress,
+            x0=theta_init,
+            method='BFGS',
+            options={'maxiter': 1000}
+        )
         
-        offline_data = collect_data(iter, policy_PPO, feature_dim)
-        theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
-        theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
-        loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
-        loss_BRM_m = loss_policy_evaluation(theta_BRM, Q_real)
+        print(f"\nFinal loss: {result.fun:.6f}")
+        print(f"BFGS iterations: {result.nit}")
+        print(f"Function evaluations: {n_evals}")
+        print(f"Average evaluations per iteration: {n_evals/result.nit:.1f}")
+        
+    finally:
+        pbar.close()
+    
+    return result.x
 
-        l2_norm_diff_LSTD_list.append(loss_LSTD_m)
-        l2_norm_diff_BRM_list.append(loss_BRM_m)
-    # print(len(l2_norm_diff_LSTD_list), len(l2_norm_diff_BRM_list))
-    loss_LSTD = [a + b for a, b in zip(loss_LSTD, l2_norm_diff_LSTD_list)]
-    loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
-loss_LSTD = [value / repeat for value in loss_LSTD]
-loss_BRM = [value / repeat for value in loss_BRM]
+find_optimal_theta(feature_dim)
+# Q_real = np.load(f"Q_function_grid_3.npy")
+# iter = int( n_samples / 50 )
+# loss_LSTD = [0] * int(n_samples/ iter)
+# loss_BRM = [0] * int(n_samples/ iter)
+# total_pairs = 2 * num_grids**4 
+
+# for _ in tqdm(range(repeat)):
+#     l2_norm_diff_BRM_list = []
+#     l2_norm_diff_LSTD_list = []
+#     theta_lstd = np.zeros(feature_dim)
+#     # theta_lstd = np.random.normal(0, 1, feature_dim)
+#     theta_BRM = np.zeros(feature_dim)
+#     for m in range(iter, n_samples + 1, iter):
+        
+#         offline_data = collect_data(iter, policy_mix(0.5),policy_PPO, feature_dim)
+#         theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
+#         theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
+#         loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
+#         loss_BRM_m = loss_policy_evaluation(theta_BRM, Q_real)
+
+#         l2_norm_diff_LSTD_list.append(loss_LSTD_m)
+#         l2_norm_diff_BRM_list.append(loss_BRM_m)
+#         # print(f"Loss LSTD: {loss_LSTD_m}, Loss BRM: {loss_BRM_m}")
+#     # print(len(l2_norm_diff_LSTD_list), len(l2_norm_diff_BRM_list))
+#     loss_LSTD = [a + b for a, b in zip(loss_LSTD, l2_norm_diff_LSTD_list)]
+#     loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
+# loss_LSTD = [value / repeat for value in loss_LSTD]
+# loss_BRM = [value / repeat for value in loss_BRM]
 
 
 
-plt.figure(figsize=(10, 6))
-plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
-plt.plot(range(iter, n_samples + 1, iter), loss_LSTD, label='LSTD Loss', color='blue')
-plt.xlabel('Number of Data Points')
-plt.ylabel('L2 Norm Difference')
-# plt.yscale('log')
-plt.title(f'Loss Curves for BRM and LSTD in {env_name}')
-plt.legend()
-plt.grid(True)
-plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(10, 6))
+# plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
+# plt.plot(range(iter, n_samples + 1, iter), loss_LSTD, label='LSTD Loss', color='blue')
+# plt.xlabel('Number of Data Points')
+# plt.ylabel('L2 Norm Difference')
+# # plt.yscale('log')
+# plt.title(f'Loss Curves for BRM and LSTD in {env_name}')
+# plt.legend()
+# plt.grid(True)
+# plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
+# plt.show()
 
 
 

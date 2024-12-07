@@ -28,7 +28,42 @@ def policy_PPO(s):
   action = model_PPO.predict(s)[0]
   return action
 
+def policy_mix(mix=0.75):
+    """
+    Creates a policy function with fixed mix parameter
+    
+    Args:
+        mix: Probability of using PPO policy (default 0.75)
+    
+    Returns:
+        Function that takes only state parameter
+    """
+    def policy(s):
+        if np.random.rand() < mix:
+            return policy_PPO(s)
+        else:
+            return policy_unif(s)
+    return policy
+
+def fourier_features(state, action, feature_dim = feature_dim, length_scale=1.0):
+    # np.random.seed(0)
+    state_array = np.array(state, dtype=np.float32).reshape(-1)
+    action_array = np.array([int(action)])
+    state_action = np.concatenate((state_array, action_array))
+    dim = state_action.shape[0]
+    omega = np.zeros((dim, feature_dim))
+    
+    for j in range(feature_dim):
+        # Create frequency multipliers that increase with column index
+        freq = (j + 1) * np.pi
+        # Fill column with increasing frequencies for each dimension
+        for i in range(dim):
+            omega[i,j] = freq * (i + 1)
+    feature =  np.cos( state_action @ omega)
+    return feature
+
 def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length_scale=1.0):
+    # return fourier_features(state, action, feature_dim)
     if len(state) != 2:
         raise ValueError("State length must be 4")
     np.random.seed(0)
@@ -68,18 +103,18 @@ def collect_trajectory(policy, feature_dim):
     # print(len(traj_list))
     return traj_list[:-1]  # removing the terminal state
 
-def collect_data(n, policy, feature_dim=feature_dim):
+def collect_data(n, policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
     data = []
     while len(data) < n:
-        trajectory = collect_trajectory(policy, feature_dim)
+        trajectory = collect_trajectory(policy_to_gen_data, feature_dim)
         i = 0
         while i < len(trajectory)-3:
             state = trajectory[i]
-            action = policy(state)
-            phi_sa = rbf_random_fourier_features(state, action, feature_dim)
+            
+            phi_sa = trajectory[i+1]
             reward = trajectory[i+2]
             next_state = trajectory[i+3]
-            next_action = policy(next_state)
+            next_action = policy_to_eval(next_state)
             phi_sa_prime = rbf_random_fourier_features(next_state, next_action, feature_dim)
             
             data.append((phi_sa, reward, phi_sa_prime))
@@ -216,7 +251,7 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
         Q_est_i = Q(state, action, theta)
         loss += (Q_est_i- Q_real[i])**2
     loss /= total_pairs
-    # print('Q_est_i:', Q_est_i), print('Q_real:', Q_real[i])
+    print('Q_est_i:', Q_est_i), print('Q_real:', Q_real[i])
     return loss
 
 
@@ -250,7 +285,7 @@ for _ in tqdm(range(repeat)):
     theta_BRM = np.zeros(feature_dim)
     for m in range(iter, n_samples + 1, iter):
         
-        offline_data = collect_data(iter, policy_PPO, feature_dim)
+        offline_data = collect_data(iter, policy_mix(0.75),policy_mix(0.9), feature_dim)
         theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
         theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
         loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
