@@ -11,7 +11,7 @@ from scipy.optimize import minimize
 
 model_PPO = PPO.load("ppo_cartpole")
 env_name = 'CartPole-v1'
-n_samples = 100000
+n_samples = 10000
 feature_dim = 100 # Example feature dimension
 repeat = 1
 gamma = 0.9
@@ -28,7 +28,7 @@ def policy_PPO(s):
   action = model_PPO.predict(s)[0]
   return action
 
-def policy_mix(mix=0.75):
+def policy_mix(mix):
     """
     Creates a policy function with fixed mix parameter
     
@@ -259,93 +259,124 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
         Q_est_i = Q(state, action, theta)
         loss += (Q_est_i- Q_real[i])**2
         # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
-    
+        print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
     loss /= total_pairs
     return loss
 
-def more_loss_policy_evaluation(theta,  num_grids ):
-    loss = 0 
-    total_pairs = 2 * num_grids**4
-    for i in range(total_pairs):
-        state, action = index_to_state_action(i, num_grids)
-        Q_est_i = Q(state, action, theta)
-        loss += (Q_est_i- 10)**2
-        # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
-    loss /= total_pairs
-    return loss
+# def more_loss_policy_evaluation(theta,  num_grids ):
+#     loss = 0 
+#     total_pairs = 2 * num_grids**4
+#     dim = theta.shape[0]
+#     for i in range(total_pairs):
+#         state, action = index_to_state_action(i, num_grids)
+#         Q_est_i = Q(state, action, theta,feature_dim = dim)
+#         loss += (Q_est_i- 10)**2
+#         # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
+#     loss /= total_pairs
+#     return loss
 
-def find_optimal_theta(feature_dim, num_grids=4):
-    theta_init = np.zeros(feature_dim)
-    pbar = tqdm(total=105000, desc='Optimizing theta')
-    n_evals = 0
+# def find_optimal_theta(feature_dim, num_grids=4):
+#     theta_init = np.zeros(feature_dim)
+#     pbar = tqdm(total=105000, desc='Optimizing theta')
+#     n_evals = 0
     
-    def objective_with_progress(theta):
-        nonlocal n_evals
-        n_evals += 1
-        pbar.update(1)
-        return more_loss_policy_evaluation(theta, num_grids)
+#     def objective_with_progress(theta):
+#         nonlocal n_evals
+#         n_evals += 1
+#         pbar.update(1)
+#         return more_loss_policy_evaluation(theta, num_grids)
     
-    try:
-        result = minimize(
-            fun=objective_with_progress,
-            x0=theta_init,
-            method='BFGS',
-            options={'maxiter': 1000}
-        )
+#     try:
+#         result = minimize(
+#             fun=objective_with_progress,
+#             x0=theta_init,
+#             method='BFGS',
+#             options={'maxiter': 1000}
+#         )
         
-        print(f"\nFinal loss: {result.fun:.6f}")
-        print(f"BFGS iterations: {result.nit}")
-        print(f"Function evaluations: {n_evals}")
-        print(f"Average evaluations per iteration: {n_evals/result.nit:.1f}")
+#         print(f"\nFinal loss: {result.fun:.6f}")
+#         print(f"BFGS iterations: {result.nit}")
+#         print(f"Function evaluations: {n_evals}")
+#         print(f"Average evaluations per iteration: {n_evals/result.nit:.1f}")
         
-    finally:
-        pbar.close()
+#     finally:
+#         pbar.close()
     
-    return result.x
+#     return result.x
+# def get_optimal_theta_ridge(feature_dim, num_grids = 20, lambda_reg=0.1):
+#     """
+#     Find optimal theta using ridge regression
+#     """
+#     total_pairs = 2 * num_grids**4
+    
+#     # Build feature matrix Φ
+#     Phi = np.zeros((total_pairs, feature_dim))
+#     for i in range(total_pairs):
+#         state, action = index_to_state_action(i, num_grids)
+#         Phi[i] = rbf_random_fourier_features(state, action, feature_dim)
+    
+#     # Target vector
+#     y = 10 * np.ones(total_pairs)
+    
+#     # Ridge regression solution: θ* = (Φ^T Φ + λI)^(-1) Φ^T y
+#     I = np.eye(feature_dim)
+#     theta_ridge = np.linalg.inv(Phi.T @ Phi + lambda_reg * I) @ Phi.T @ y
+    
+#     # Calculate minimized loss including regularization term
+#     pred = Phi @ theta_ridge
+#     mse_loss = np.mean((pred - y)**2)
+    
+    
+#     print(f"MSE loss: {mse_loss:.6f}")
+#     loss_eval = more_loss_policy_evaluation(theta_ridge, 3 )
+#     print( f"Loss evaluation: {loss_eval:.6f}")
 
-find_optimal_theta(feature_dim)
-# Q_real = np.load(f"Q_function_grid_3.npy")
-# iter = int( n_samples / 50 )
-# loss_LSTD = [0] * int(n_samples/ iter)
-# loss_BRM = [0] * int(n_samples/ iter)
-# total_pairs = 2 * num_grids**4 
+#     return theta_ridge
+# get_optimal_theta_ridge(1000)
 
-# for _ in tqdm(range(repeat)):
-#     l2_norm_diff_BRM_list = []
-#     l2_norm_diff_LSTD_list = []
-#     theta_lstd = np.zeros(feature_dim)
-#     # theta_lstd = np.random.normal(0, 1, feature_dim)
-#     theta_BRM = np.zeros(feature_dim)
-#     for m in range(iter, n_samples + 1, iter):
+Q_real = np.load(f"Q_function_grid_3_mix_0.2.npy")
+
+iter = int( n_samples / 50 )
+loss_LSTD = [0] * int(n_samples/ iter)
+loss_BRM = [0] * int(n_samples/ iter)
+total_pairs = 2 * num_grids**4 
+
+for _ in tqdm(range(repeat)):
+    l2_norm_diff_BRM_list = []
+    l2_norm_diff_LSTD_list = []
+    theta_lstd = np.zeros(feature_dim)
+    # theta_lstd = np.random.normal(0, 1, feature_dim)
+    theta_BRM = np.zeros(feature_dim)
+    for m in range(iter, n_samples + 1, iter):
         
-#         offline_data = collect_data(iter, policy_mix(0.5),policy_PPO, feature_dim)
-#         theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
-#         theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
-#         loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
-#         loss_BRM_m = loss_policy_evaluation(theta_BRM, Q_real)
+        offline_data = collect_data(iter, policy_mix(0.2),policy_mix(0.2), feature_dim)
+        theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
+        theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
+        loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
+        loss_BRM_m = loss_policy_evaluation(theta_BRM, Q_real)
 
-#         l2_norm_diff_LSTD_list.append(loss_LSTD_m)
-#         l2_norm_diff_BRM_list.append(loss_BRM_m)
-#         # print(f"Loss LSTD: {loss_LSTD_m}, Loss BRM: {loss_BRM_m}")
-#     # print(len(l2_norm_diff_LSTD_list), len(l2_norm_diff_BRM_list))
-#     loss_LSTD = [a + b for a, b in zip(loss_LSTD, l2_norm_diff_LSTD_list)]
-#     loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
-# loss_LSTD = [value / repeat for value in loss_LSTD]
-# loss_BRM = [value / repeat for value in loss_BRM]
+        l2_norm_diff_LSTD_list.append(loss_LSTD_m)
+        l2_norm_diff_BRM_list.append(loss_BRM_m)
+        # print(f"Loss LSTD: {loss_LSTD_m}, Loss BRM: {loss_BRM_m}")
+    # print(len(l2_norm_diff_LSTD_list), len(l2_norm_diff_BRM_list))
+    loss_LSTD = [a + b for a, b in zip(loss_LSTD, l2_norm_diff_LSTD_list)]
+    loss_BRM = [a + b for a, b in zip(loss_BRM, l2_norm_diff_BRM_list)]
+loss_LSTD = [value / repeat for value in loss_LSTD]
+loss_BRM = [value / repeat for value in loss_BRM]
 
 
 
-# plt.figure(figsize=(10, 6))
-# plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
-# plt.plot(range(iter, n_samples + 1, iter), loss_LSTD, label='LSTD Loss', color='blue')
-# plt.xlabel('Number of Data Points')
-# plt.ylabel('L2 Norm Difference')
-# # plt.yscale('log')
-# plt.title(f'Loss Curves for BRM and LSTD in {env_name}')
-# plt.legend()
-# plt.grid(True)
-# plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
-# plt.show()
+plt.figure(figsize=(10, 6))
+plt.plot(range(iter, n_samples + 1, iter), loss_BRM, label='BRM Loss', color='red')
+plt.plot(range(iter, n_samples + 1, iter), loss_LSTD, label='LSTD Loss', color='blue')
+plt.xlabel('Number of Data Points')
+plt.ylabel('L2 Norm Difference')
+# plt.yscale('log')
+plt.title(f'Loss Curves for BRM and LSTD in {env_name}')
+plt.legend()
+plt.grid(True)
+plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
+plt.show()
 
 
 
