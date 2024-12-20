@@ -14,7 +14,7 @@ gym.make(env_name)
 n_samples = 10000
 feature_dim = 50 # Example feature dimension
 repeat = 1
-gamma = 0.9
+gamma = 0.99
 num_grids = 6 # need to be changed in different environment
 
 env = gym.make(env_name)
@@ -255,7 +255,7 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
     return loss
 
 
-Q_real = np.load(f"Q_function_Mountain_car_grid_6.npy")
+Q_real = np.load(f"Q_function_Mountain_car_grid_6_gamma_0.99.npy")
 
 # Define the objective function for optimization
 # def objective_function(theta):

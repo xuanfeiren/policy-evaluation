@@ -1,5 +1,4 @@
 from importlib.metadata import PathDistribution
-from re import S
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,16 +61,23 @@ def fourier_features(state, action, feature_dim = feature_dim, length_scale=1.0)
     feature =  np.cos( state_action @ omega)
     return feature
 
-def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length_scale=1):
+# seed = np.random.randint(0, 10000)
+# print(f"Random seed: {seed}")
+def RFFeatures(state, action, feature_dim = feature_dim, length_scale=1,seed=0):
     # return fourier_features(state, action, feature_dim, length_scale)
     if len(state) != 4:
         raise ValueError("State length must be 4")
-    np.random.seed(0)
+    np.random.seed(seed)
     state_array = np.array(state, dtype=np.float32).reshape(-1)
     action_array = np.array([int(action)])
     state_action = np.concatenate((state_array, action_array))
+    # Normalize state_action to [0, 1]
+    # state_action = (state_action - state_action.min()) / (state_action.max() - state_action.min())
+    # return state_action
     dim = state_action.shape[0]
-    
+
+    feature_dim = feature_dim - 1
+
     # Handle even/odd feature dimensions
     if feature_dim % 2 == 0:
         d_cos = d_sin = feature_dim // 2
@@ -85,6 +91,8 @@ def rbf_random_fourier_features(state, action, feature_dim = feature_dim, length
     cos_features = np.cos(z)
     sin_features = np.sin(z[:d_sin]) if d_sin > 0 else np.array([])
     feature = np.sqrt(1.0 / feature_dim) * np.concatenate([cos_features, sin_features])
+
+    feature = np.concatenate((feature,np.sqrt(1.0 / feature_dim) *action_array))
     return feature
 
 def collect_trajectory(policy, feature_dim):
@@ -92,7 +100,7 @@ def collect_trajectory(policy, feature_dim):
     traj_list = [s0]
     while True:
         a0 = policy(s0)
-        phi_sa = rbf_random_fourier_features(s0, a0, feature_dim)
+        phi_sa = linear_features(s0, a0, feature_dim)
         traj_list.append(phi_sa)
         s1, r0,  terminated, truncated, _ = env.step(a0)
         traj_list.append(r0)
@@ -115,7 +123,7 @@ def collect_data(n,policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
             reward = trajectory[i+2]
             next_state = trajectory[i+3]
             next_action = policy_to_eval(next_state)
-            phi_sa_prime = rbf_random_fourier_features(next_state, next_action, feature_dim)
+            phi_sa_prime = linear_features(next_state, next_action, feature_dim)
             
             data.append((phi_sa, reward, phi_sa_prime))
             i += 3
@@ -125,7 +133,7 @@ def collect_data(n,policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
     return data[:n]  # Return exactly n samples as a single array
 
 def Q(state, action, theta,feature_dim=feature_dim):
-    phi_sa = rbf_random_fourier_features(state, action, feature_dim)
+    phi_sa = linear_features(state, action, feature_dim)
     return np.dot(theta, phi_sa)
 
 def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=1):
@@ -138,10 +146,31 @@ def policy_eval_LSTD(theta_init,data, feature_dim=feature_dim, alpha=1):
         theta_lstd += alpha * td_error * phi_sa
     
     # def Q(state, action):
-    #     phi_sa = rbf_random_fourier_features(state, action, feature_dim)
+    #     phi_sa = linear_features(state, action, feature_dim)
     #     return np.dot(theta_lstd, phi_sa)
     
     return theta_lstd
+
+def policy_eval_FQI(theta_init,data, num_FQI=10):
+    theta_FQI = np.copy(theta_init)
+    m = len(data)
+    dim = theta_init.shape[0]
+    Sigma_cov = np.zeros((dim, dim))
+    theta_phi_r = np.zeros(dim)
+    Sigma_cr = np.zeros((dim, dim))
+
+    for phi_sa, reward, phi_sa_prime in data:
+        Sigma_cov += np.outer(phi_sa, phi_sa)
+        theta_phi_r += reward * phi_sa
+        Sigma_cr += np.outer(phi_sa, phi_sa_prime)
+    
+    Sigma_cov /= m
+    theta_phi_r /= m
+    Sigma_cr /= m
+    for _ in range(num_FQI):
+            # use m data to update theta
+            theta_FQI = np.linalg.inv( Sigma_cov) @ ( theta_phi_r+  gamma * Sigma_cr @ theta_FQI)
+    return theta_FQI
 
 def policy_eval_BRM(theta_init, data,  feature_dim=feature_dim, learning_rate=1):
     theta_BRM = np.copy(theta_init)
@@ -151,7 +180,7 @@ def policy_eval_BRM(theta_init, data,  feature_dim=feature_dim, learning_rate=1)
         theta_BRM -= learning_rate * gradient
         
     # def Q(state, action):
-    #     phi_sa = rbf_random_fourier_features(state, action, feature_dim)
+    #     phi_sa = linear_features(state, action, feature_dim)
     #     return np.dot(theta_BRM, phi_sa)
     
     return theta_BRM
@@ -257,9 +286,9 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
     for i in range(total_pairs):
         state, action = index_to_state_action(i, num_grids)
         Q_est_i = Q(state, action, theta)
+        # Q_real[i] = 0
         loss += (Q_est_i- Q_real[i])**2
         # print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
-        print(f"Q_est: {Q_est_i}, Q_real: {Q_real[i]}")
     loss /= total_pairs
     return loss
 
@@ -313,7 +342,7 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
 #     Phi = np.zeros((total_pairs, feature_dim))
 #     for i in range(total_pairs):
 #         state, action = index_to_state_action(i, num_grids)
-#         Phi[i] = rbf_random_fourier_features(state, action, feature_dim)
+#         Phi[i] = linear_features(state, action, feature_dim)
     
 #     # Target vector
 #     y = 10 * np.ones(total_pairs)
@@ -334,14 +363,17 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
 #     return theta_ridge
 # get_optimal_theta_ridge(1000)
 
-Q_real = np.load(f"Q_function_grid_3_mix_0.2.npy")
-
+Q_real = np.load(f"Q_function_grid_3.npy")
+seed_to_traverse = 0
+def linear_features(state, action, feature_dim):
+    return RFFeatures(state, action, feature_dim, seed=seed_to_traverse)
+    
 iter = int( n_samples / 50 )
 loss_LSTD = [0] * int(n_samples/ iter)
 loss_BRM = [0] * int(n_samples/ iter)
 total_pairs = 2 * num_grids**4 
 
-for _ in tqdm(range(repeat)):
+for _ in (range(repeat)):
     l2_norm_diff_BRM_list = []
     l2_norm_diff_LSTD_list = []
     theta_lstd = np.zeros(feature_dim)
@@ -349,7 +381,7 @@ for _ in tqdm(range(repeat)):
     theta_BRM = np.zeros(feature_dim)
     for m in range(iter, n_samples + 1, iter):
         
-        offline_data = collect_data(iter, policy_mix(0.2),policy_mix(0.2), feature_dim)
+        offline_data = collect_data(iter, policy_mix(1),policy_PPO, feature_dim)
         theta_lstd = policy_eval_LSTD(theta_lstd, offline_data)
         theta_BRM = policy_eval_BRM(theta_BRM, offline_data)
         loss_LSTD_m = loss_policy_evaluation(theta_lstd, Q_real)
@@ -364,6 +396,13 @@ for _ in tqdm(range(repeat)):
 loss_LSTD = [value / repeat for value in loss_LSTD]
 loss_BRM = [value / repeat for value in loss_BRM]
 
+# theta_FQI = np.zeros(feature_dim)
+# offline_data = collect_data(n_samples, policy_PPO,policy_PPO, feature_dim)
+# theta_FQI = policy_eval_FQI(theta_FQI, offline_data)
+# loss_FQI = loss_policy_evaluation(theta_FQI, Q_real)
+# print(f"Loss FQI: {loss_FQI}")
+
+
 
 
 plt.figure(figsize=(10, 6))
@@ -377,6 +416,7 @@ plt.legend()
 plt.grid(True)
 plt.savefig(f'plot_image_env_{env_name}_n_samples_{n_samples}_feature_dim_{feature_dim}_repeat_{repeat}_gamma_{gamma}_num_grids_{num_grids}.pdf', bbox_inches='tight')
 plt.show()
+        
 
 
 
