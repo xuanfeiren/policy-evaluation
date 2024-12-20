@@ -1,4 +1,5 @@
 # frozen-lake.py
+import re
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,12 +7,12 @@ from tqdm import tqdm
 
 
 
-n_samples = 100
-feature_dim = 32 # Example feature dimension
+n_samples = 1000
+feature_dim = 1 # Example feature dimension
 repeat = 1
 gamma = 0.99
 env_name = 'FrozenLake-v1'
-env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=True)
+env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
 
 env.reset()
 
@@ -30,7 +31,7 @@ def best_policy(s):
 
 def best_policy_rand(s):
   random_value = np.random.rand()
-  if random_value < 0.9:
+  if random_value < 0.95:
     return best_policy(s)
   else:
     return policy_unif(s)
@@ -72,18 +73,18 @@ def collect_trajectory(policy, feature_dim):
         if terminated or truncated:
             break
     # print(len(traj_list))
-    return traj_list[:-1]  # removing the terminal state
+    return traj_list  # removing the terminal state
 
 def collect_data(n, policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
     data = []
     while len(data) < n:
         trajectory = collect_trajectory(policy_to_gen_data, feature_dim)
         i = 0
-        while i < len(trajectory)-3:
+        while i <= len(trajectory)-3:
             state = trajectory[i]
-            
             phi_sa = trajectory[i+1]
             reward = trajectory[i+2]
+            print(reward)
             next_state = trajectory[i+3]
             next_action = policy_to_eval(next_state)
             phi_sa_prime = rbf_random_fourier_features(next_state, next_action, feature_dim)
@@ -182,7 +183,7 @@ def loss_policy_evaluation(theta, Q_real):
     return loss
 
 
-iter = int( n_samples / 50 )
+iter = int( n_samples /10 )
 loss_LSTD = [0] * int(n_samples/ iter)
 loss_BRM = [0] * int(n_samples/ iter)
 
