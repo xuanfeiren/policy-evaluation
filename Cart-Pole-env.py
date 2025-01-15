@@ -13,7 +13,7 @@ env_name = 'CartPole-v1'
 n_samples = 10000
 feature_dim = 100 # Example feature dimension
 repeat = 1
-gamma = 0.9
+gamma = 0.99
 num_grids = 3
 
 env = gym.make(env_name)
@@ -109,14 +109,14 @@ def collect_trajectory(policy, feature_dim):
         if terminated or truncated:
             break
     # print(len(traj_list))
-    return traj_list[:-1]  # removing the terminal state
+    return traj_list
 
 def collect_data(n,policy_to_gen_data, policy_to_eval, feature_dim=feature_dim):
     data = []
     while len(data) < n:
         trajectory = collect_trajectory(policy_to_gen_data, feature_dim)
         i = 0
-        while i < len(trajectory)-3:
+        while i <= len(trajectory)-3:
             state = trajectory[i]
             # action = policy(state)
             phi_sa = trajectory[i+1]
@@ -363,7 +363,7 @@ def loss_policy_evaluation(theta, Q_real, num_grids = num_grids):
 #     return theta_ridge
 # get_optimal_theta_ridge(1000)
 
-Q_real = np.load(f"Q_function_grid_3.npy")
+Q_real = np.load(f"Q_function_grid_3_gamma_0.99.npy")
 seed_to_traverse = 0
 def linear_features(state, action, feature_dim):
     return RFFeatures(state, action, feature_dim, seed=seed_to_traverse)
