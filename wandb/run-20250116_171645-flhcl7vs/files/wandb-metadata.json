@@ -1,0 +1,42 @@
+{
+  "os": "Windows-11-10.0.26100-SP0",
+  "python": "CPython 3.12.7",
+  "startedAt": "2025-01-16T23:16:46.078201Z",
+  "program": "c:\\experiments\\policy-evaluation\\linear_with_trained_features_LSTD.ipynb",
+  "codePath": "linear_with_trained_features_LSTD.ipynb",
+  "git": {
+    "remote": "git@github.com:xuanfeiren/policy-evaluation.git",
+    "commit": "693e2b68ad8f933ea3287130cd471e6623623ba8"
+  },
+  "email": "2754630954@qq.com",
+  "root": "c:\\experiments\\policy-evaluation",
+  "host": "Xuanfei-Desktop",
+  "executable": "c:\\Users\\xuanf\\miniconda3\\envs\\policy-eval\\python.exe",
+  "codePathLocal": "linear_with_trained_features_LSTD.ipynb",
+  "cpu_count": 10,
+  "cpu_count_logical": 16,
+  "gpu": "NVIDIA GeForce RTX 4060",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1023240302592",
+      "used": "299952082944"
+    }
+  },
+  "memory": {
+    "total": "34100047872"
+  },
+  "cpu": {
+    "count": 10,
+    "countLogical": 16
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4060",
+      "memoryTotal": "8585740288",
+      "cudaCores": 3072,
+      "architecture": "Ada"
+    }
+  ],
+  "cudaVersion": "12.5"
+}
