@@ -20,3 +20,10 @@ config: {'num_episodes': 600}
 2025-01-25 13:00:35,479 INFO    MainThread:23024 [wandb_run.py:_redirect():2335] Wrapping output streams.
 2025-01-25 13:00:35,479 INFO    MainThread:23024 [wandb_run.py:_redirect():2360] Redirects installed.
 2025-01-25 13:00:35,482 INFO    MainThread:23024 [wandb_init.py:init():983] run started, returning control to user process
+2025-01-25 14:29:52,145 INFO    MainThread:23024 [wandb_run.py:_finish():2145] finishing run xuanfeiren-university-of-wisconsin-madison/CartPole-v1/r2ogz76j
+2025-01-25 14:29:52,146 INFO    MainThread:23024 [wandb_run.py:_atexit_cleanup():2385] got exitcode: 0
+2025-01-25 14:29:52,146 INFO    MainThread:23024 [wandb_run.py:_restore():2367] restore
+2025-01-25 14:29:52,147 INFO    MainThread:23024 [wandb_run.py:_restore():2373] restore done
+2025-01-25 14:29:53,640 INFO    MainThread:23024 [wandb_run.py:_footer_history_summary_info():3987] rendering history
+2025-01-25 14:29:53,640 INFO    MainThread:23024 [wandb_run.py:_footer_history_summary_info():4019] rendering summary
+2025-01-25 14:29:53,641 INFO    MainThread:23024 [wandb_run.py:_footer_sync_info():3948] logging synced files

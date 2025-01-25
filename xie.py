@@ -109,6 +109,7 @@ class DQN_Agent(object):
             return random.randrange(self.action_space_dim)
         else:
             with torch.no_grad():
+                s0 = s0[0] if isinstance(s0, tuple) else s0
                 state = torch.tensor(s0, dtype=torch.float).to(self.device)
                 q_values = self.q_net(state)
                 return torch.argmax(q_values).item()
@@ -125,8 +126,10 @@ class DQN_Agent(object):
         # Sample random batch from replay buffer
         samples = random.sample(self.buffer, self.batch_size)
         s0, a0, r1, s1, done = zip(*samples)
-
+        # s0 = s0[0] if isinstance(s0, tuple) else s0
         # Convert to tensors
+        s0 = [s[0] if isinstance(s, tuple) else s for s in s0]
+        s1 = [s[0] if isinstance(s, tuple) else s for s in s1]
         s0 = torch.tensor(s0, dtype=torch.float).to(self.device)
         a0 = torch.tensor(a0, dtype=torch.long).view(self.batch_size, -1).to(self.device)
         r1 = torch.tensor(r1, dtype=torch.float).view(self.batch_size, -1).to(self.device)
@@ -136,6 +139,7 @@ class DQN_Agent(object):
         # Compute target Q values
         with torch.no_grad():
             next_q_values = self.target_net(s1)
+            a = torch.max(next_q_values)
             max_next_q = torch.max(next_q_values, dim=1)[0].view(self.batch_size, -1)
             target_q = r1 + (1 - done) * self.gamma * max_next_q
 
@@ -164,8 +168,8 @@ def train_dqn(env, agent, num_episodes):
         
         while not done:
             action = agent.act(state)
-            next_state, reward, done, _ = env.step(action)
-            
+            next_state, reward, terminated, truncated,  _ = env.step(action)
+            done = terminated or truncated
             # Store transition in replay buffer
             agent.put(state, action, reward, next_state, done)
             
