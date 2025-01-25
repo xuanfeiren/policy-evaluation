@@ -1,0 +1,11 @@
+  1%|█                                                                                              | 7/600 [01:04<1:30:26,  9.15s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 244, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 145, in optimize_models
+    policy_DQN(state.unsqueeze(0)).item()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 43, in policy_DQN
+    action = actions.max(1)[1].view(1, 1)
+             ^^^^^^^^^^^^^^
+KeyboardInterrupt

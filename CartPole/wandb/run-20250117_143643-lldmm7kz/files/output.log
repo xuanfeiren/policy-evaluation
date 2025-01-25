@@ -1,0 +1,22 @@
+  6%|█████▍                                                                                        | 35/600 [05:59<1:36:48, 10.28s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 243, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 179, in optimize_models
+    optimizer_LSTD.step()
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\optimizer.py", line 487, in wrapper
+    out = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\optimizer.py", line 91, in _use_grad
+    ret = func(self, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\adamw.py", line 220, in step
+    adamw(
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\optimizer.py", line 154, in maybe_fallback
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\adamw.py", line 782, in adamw
+    func(
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\adamw.py", line 608, in _multi_tensor_adamw
+    torch._foreach_div_(exp_avg_sq_sqrt, bias_correction2_sqrt)
+KeyboardInterrupt

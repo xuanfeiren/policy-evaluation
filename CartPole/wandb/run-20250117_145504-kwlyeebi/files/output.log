@@ -1,0 +1,14 @@
+ 17%|███████████████▋                                                                             | 101/600 [16:44<1:22:42,  9.94s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 243, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 145, in optimize_models
+    policy_DQN(state.unsqueeze(0)).item()
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 42, in policy_DQN
+    actions = DQN_net(state)
+              ^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

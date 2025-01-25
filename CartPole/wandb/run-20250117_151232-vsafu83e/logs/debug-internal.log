@@ -1,0 +1,16 @@
+{"time":"2025-01-17T15:12:32.3186807-06:00","level":"INFO","msg":"stream: starting","core version":"0.19.3","symlink path":"C:\\experiments\\policy-evaluation\\CartPole\\wandb\\run-20250117_151232-vsafu83e\\logs\\debug-core.log"}
+{"time":"2025-01-17T15:12:32.4304287-06:00","level":"INFO","msg":"created new stream","id":"vsafu83e"}
+{"time":"2025-01-17T15:12:32.4304287-06:00","level":"INFO","msg":"stream: started","id":"vsafu83e"}
+{"time":"2025-01-17T15:12:32.4304287-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:12:32.4304287-06:00","level":"INFO","msg":"sender: started","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:12:32.4304287-06:00","level":"INFO","msg":"handler: started","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:12:32.5848009-06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-01-17T15:21:46.4717134-06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-01-17T15:21:46.4722205-06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-01-17T15:21:46.9112841-06:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-01-17T15:21:46.9994112-06:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-01-17T15:21:48.0105352-06:00","level":"INFO","msg":"stream: closing","id":"vsafu83e"}
+{"time":"2025-01-17T15:21:48.0105352-06:00","level":"INFO","msg":"handler: closed","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:21:48.0105352-06:00","level":"INFO","msg":"writer: Close: closed","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:21:48.0105352-06:00","level":"INFO","msg":"sender: closed","stream_id":"vsafu83e"}
+{"time":"2025-01-17T15:21:48.0105352-06:00","level":"INFO","msg":"stream: closed","id":"vsafu83e"}

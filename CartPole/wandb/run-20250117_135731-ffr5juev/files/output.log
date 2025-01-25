@@ -1,0 +1,21 @@
+ 42%|███████████████████████████████████████▉                                                       | 252/600 [37:37<51:57,  8.96s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 239, in <module>
+    state = next_state
+    ^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 140, in optimize_model
+    state_action_values = policy_net_BRM(state_batch).gather(1, action_batch)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 40, in policy_DQN
+    actions = DQN_net(state)
+              ^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 27, in forward
+    def forward(self, x):
+
+KeyboardInterrupt

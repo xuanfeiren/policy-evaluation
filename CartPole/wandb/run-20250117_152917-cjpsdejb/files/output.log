@@ -1,0 +1,16 @@
+  6%|█████▌                                                                                          | 35/600 [00:41<11:02,  1.17s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 244, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 175, in optimize_models
+    optimizer_LSTD.zero_grad()
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\_compile.py", line 32, in inner
+    return disable_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\_dynamo\eval_frame.py", line 632, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\optim\optimizer.py", line 952, in zero_grad
+    p.grad = None
+    ^^^^^^
+KeyboardInterrupt

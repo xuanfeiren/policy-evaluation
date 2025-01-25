@@ -1,0 +1,27 @@
+  2%|█▋                                                                                            | 11/600 [01:41<1:32:48,  9.45s/it][34m[1mwandb[0m: [33mWARNING[0m Fatal error while uploading data. Some run data will not be synced, but it will still be written to disk. Use `wandb sync` at the end of the run to try uploading.
+  2%|██                                                                                            | 13/600 [02:06<1:35:02,  9.72s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 243, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 142, in optimize_models
+    state_action_values = policy_net_BRM(state_batch).gather(1, action_batch)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 78, in forward
+    return self.linear(x)
+           ^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\torch\nn\modules\linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

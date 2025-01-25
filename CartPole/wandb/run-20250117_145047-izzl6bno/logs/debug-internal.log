@@ -1,0 +1,19 @@
+{"time":"2025-01-17T14:50:47.8185488-06:00","level":"INFO","msg":"stream: starting","core version":"0.19.3","symlink path":"C:\\experiments\\policy-evaluation\\CartPole\\wandb\\run-20250117_145047-izzl6bno\\logs\\debug-core.log"}
+{"time":"2025-01-17T14:50:47.9328989-06:00","level":"INFO","msg":"created new stream","id":"izzl6bno"}
+{"time":"2025-01-17T14:50:47.9328989-06:00","level":"INFO","msg":"stream: started","id":"izzl6bno"}
+{"time":"2025-01-17T14:50:47.9328989-06:00","level":"INFO","msg":"handler: started","stream_id":"izzl6bno"}
+{"time":"2025-01-17T14:50:47.9328989-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"izzl6bno"}
+{"time":"2025-01-17T14:50:47.9328989-06:00","level":"INFO","msg":"sender: started","stream_id":"izzl6bno"}
+{"time":"2025-01-17T14:50:48.1311003-06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-01-17T14:52:33.4574866-06:00","level":"ERROR","msg":"HTTP error","status":404,"method":"POST","url":"https://api.wandb.ai/files/xuanfeiren-university-of-wisconsin-madison/CartPole-v1/izzl6bno/file_stream"}
+{"time":"2025-01-17T14:52:33.4574866-06:00","level":"ERROR+4","msg":"filestream: fatal error: filestream: failed to upload: 404 Not Found path=files/xuanfeiren-university-of-wisconsin-madison/CartPole-v1/izzl6bno/file_stream: {\"error\":\"run CartPole-v1/izzl6bno not found while streaming file\"}"}
+{"time":"2025-01-17T14:52:54.5902286-06:00","level":"INFO","msg":"stream: closing","id":"izzl6bno"}
+{"time":"2025-01-17T14:52:54.5902286-06:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-01-17T14:52:54.5907534-06:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-01-17T14:52:54.6405108-06:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run izzl6bno was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-01-17T14:52:54.6846784-06:00","level":"ERROR","msg":"HTTP error","status":404,"method":"POST","url":"https://api.wandb.ai/graphql"}
+{"time":"2025-01-17T14:52:54.6846784-06:00","level":"ERROR","msg":"runfiles: CreateRunFiles returned error: returned error 404 Not Found: {\"errors\":[{\"message\":\"run CartPole-v1/izzl6bno not found during createRunFiles\",\"path\":[\"createRunFiles\"]}],\"data\":{\"createRunFiles\":null}}"}
+{"time":"2025-01-17T14:52:57.0099481-06:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run izzl6bno was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-01-17T14:53:01.9036185-06:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run izzl6bno was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-01-17T14:53:10.7744683-06:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run izzl6bno was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}
+{"time":"2025-01-17T14:53:27.0611523-06:00","level":"INFO","msg":"api: retrying HTTP error","status":409,"url":"https://api.wandb.ai/graphql","body":"{\"errors\":[{\"message\":\"run izzl6bno was previously created and deleted; try a new run name\",\"path\":[\"upsertBucket\"]}],\"data\":{\"upsertBucket\":null}}"}

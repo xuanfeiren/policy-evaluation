@@ -1,0 +1,14 @@
+  2%|██                                                                                            | 13/600 [01:59<1:30:14,  9.22s/it]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 243, in <module>
+    optimize_models()
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 128, in optimize_models
+    transitions = memory.sample(BATCH_SIZE)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\CartPole\Cart-Pole-torch-cleaned.py", line 108, in sample
+    return random.sample(self.memory, batch_size)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\xuanf\miniconda3\envs\policy-eval\Lib\random.py", line 451, in sample
+    result[i] = population[j]
+    ~~~~~~^^^
+KeyboardInterrupt
