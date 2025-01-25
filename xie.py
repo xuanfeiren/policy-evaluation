@@ -259,4 +259,4 @@ def compare_networks(env, num_episodes=500, num_runs=5):
 
 # Run comparison
 env = gym.make('CartPole-v0')
-compare_networks(env, num_episodes=500, num_runs=1)
+compare_networks(env, num_episodes=2000, num_runs=1)
