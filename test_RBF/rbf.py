@@ -269,7 +269,7 @@ def calculate_loss(policy_net, DQN_net):
     
     return total_loss / 100
 
-num_episodes = 600
+num_episodes = 6000
 
 wandb.init(
     # set the wandb project where this run will be logged
