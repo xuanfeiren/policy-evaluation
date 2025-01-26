@@ -246,17 +246,17 @@ def plot_loss(show_result=False):
     plt.plot(loss_t_LSTD.numpy())
 
 
-random_states = torch.rand(100, 4, device=device)  # Assuming 4D state space
-random_states[:, 0] = random_states[:, 0] * 4 - 2
-random_states[:, 1] = random_states[:, 1] * 20 - 10
-random_states[:, 2] = random_states[:, 2] * 0.4 - 0.2
-random_states[:, 3] = random_states[:, 3] * 20 - 10
-    
+states_list = []
+for _ in range(100):
+    state, _ = env.reset()
+    states_list.append(state)
+states = torch.tensor(states_list, dtype=torch.float32, device=device)
+
 def calculate_loss(policy_net, DQN_net):
     # Calculate the loss
     total_loss = 0
     with torch.no_grad():
-        for i, state in enumerate(random_states):
+        for state in states:
             # Process single state
             state = state.unsqueeze(0)  # Add batch dimension
             policy_output = policy_net(state)
