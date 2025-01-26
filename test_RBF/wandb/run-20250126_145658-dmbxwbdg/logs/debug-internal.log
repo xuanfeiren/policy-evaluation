@@ -1,0 +1,7 @@
+{"time":"2025-01-26T14:56:58.8811461-06:00","level":"INFO","msg":"stream: starting","core version":"0.19.3","symlink path":"C:\\experiments\\policy-evaluation\\test_RBF\\wandb\\run-20250126_145658-dmbxwbdg\\logs\\debug-core.log"}
+{"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"created new stream","id":"dmbxwbdg"}
+{"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"stream: started","id":"dmbxwbdg"}
+{"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"dmbxwbdg"}
+{"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"handler: started","stream_id":"dmbxwbdg"}
+{"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"sender: started","stream_id":"dmbxwbdg"}
+{"time":"2025-01-26T14:56:59.1171841-06:00","level":"INFO","msg":"Starting system monitor"}

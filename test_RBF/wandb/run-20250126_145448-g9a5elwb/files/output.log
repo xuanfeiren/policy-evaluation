@@ -1,0 +1,9 @@
+  0%|                                                                                                        | 0/5000 [00:04<?, ?it/s]
+Traceback (most recent call last):
+  File "c:\experiments\policy-evaluation\test_RBF\rbf.py", line 303, in <module>
+    loss_BRM = calculate_loss(policy_net_BRM, DQN_net).item()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\experiments\policy-evaluation\test_RBF\rbf.py", line 254, in calculate_loss
+    total_loss += loss.item()
+    ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'total_loss' where it is not associated with a value

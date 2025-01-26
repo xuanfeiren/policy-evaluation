@@ -17,6 +17,18 @@ from sklearn.kernel_approximation import RBFSampler
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 env = gym.make("CartPole-v1")
 
+def set_random_seed(seed=42):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+set_random_seed()
+
 class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
@@ -233,6 +245,7 @@ def plot_loss(show_result=False):
     plt.plot(loss_t_BRM.numpy())
     plt.plot(loss_t_LSTD.numpy())
 
+
 random_states = torch.rand(100, 4, device=device)  # Assuming 4D state space
 random_states[:, 0] = random_states[:, 0] * 9.6 - 4.8
 random_states[:, 1] = random_states[:, 1] * 20 - 10
@@ -241,13 +254,22 @@ random_states[:, 3] = random_states[:, 3] * 20 - 10
     
 def calculate_loss(policy_net, DQN_net):
     # Calculate the loss
-    loss = 0
+    total_loss = 0
     with torch.no_grad():
-        policy_output = policy_net(random_states)
-        dqn_output = DQN_net(random_states)
-        loss = F.mse_loss(policy_output, dqn_output)
+        for i, state in enumerate(random_states):
+            # Process single state
+            state = state.unsqueeze(0)  # Add batch dimension
+            policy_output = policy_net(state)
+            dqn_output = DQN_net(state)
+            
+            # Accumulate loss
+            loss = F.mse_loss(policy_output, dqn_output)
+            total_loss += loss
+            
+    
+    return total_loss / 100
 
-num_episodes = 5000
+num_episodes = 6000
 
 wandb.init(
     # set the wandb project where this run will be logged
