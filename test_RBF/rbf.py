@@ -247,9 +247,9 @@ def plot_loss(show_result=False):
 
 
 random_states = torch.rand(100, 4, device=device)  # Assuming 4D state space
-random_states[:, 0] = random_states[:, 0] * 9.6 - 4.8
+random_states[:, 0] = random_states[:, 0] * 4 - 2
 random_states[:, 1] = random_states[:, 1] * 20 - 10
-random_states[:, 2] = random_states[:, 2] * 0.836 - 0.418
+random_states[:, 2] = random_states[:, 2] * 0.4 - 0.2
 random_states[:, 3] = random_states[:, 3] * 20 - 10
     
 def calculate_loss(policy_net, DQN_net):
@@ -269,7 +269,7 @@ def calculate_loss(policy_net, DQN_net):
     
     return total_loss / 100
 
-num_episodes = 6000
+num_episodes = 600
 
 wandb.init(
     # set the wandb project where this run will be logged

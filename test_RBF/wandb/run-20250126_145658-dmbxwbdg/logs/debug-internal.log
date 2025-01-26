@@ -5,3 +5,5 @@
 {"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"handler: started","stream_id":"dmbxwbdg"}
 {"time":"2025-01-26T14:56:58.9916666-06:00","level":"INFO","msg":"sender: started","stream_id":"dmbxwbdg"}
 {"time":"2025-01-26T14:56:59.1171841-06:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-01-26T14:57:29.1176564-06:00","level":"ERROR","msg":"monitor: memory: error sampling metrics: The parameter is incorrect."}
+{"time":"2025-01-26T14:57:29.1240079-06:00","level":"ERROR","msg":"monitor: cpu: error sampling metrics: could not get CreationDate: The parameter is incorrect.\ncouldn't find pid: 22508"}
