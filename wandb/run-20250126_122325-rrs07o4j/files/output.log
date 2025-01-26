@@ -1,0 +1,2 @@
+  0%|                                                                                                                               | 0/600 [00:00<?, ?it/s]c:\experiments\policy-evaluation\test_RBF\rbf.py:241: UserWarning: Using a target size (torch.Size([1, 2])) that is different to the input size (torch.Size([2])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  loss += F.mse_loss(policy_net(state), DQN_net(state))

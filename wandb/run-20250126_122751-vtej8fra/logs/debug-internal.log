@@ -1,0 +1,7 @@
+{"time":"2025-01-26T12:27:52.1574279-06:00","level":"INFO","msg":"stream: starting","core version":"0.19.3","symlink path":"C:\\experiments\\policy-evaluation\\wandb\\run-20250126_122751-vtej8fra\\logs\\debug-core.log"}
+{"time":"2025-01-26T12:27:52.2694941-06:00","level":"INFO","msg":"created new stream","id":"vtej8fra"}
+{"time":"2025-01-26T12:27:52.2694941-06:00","level":"INFO","msg":"handler: started","stream_id":"vtej8fra"}
+{"time":"2025-01-26T12:27:52.2694941-06:00","level":"INFO","msg":"sender: started","stream_id":"vtej8fra"}
+{"time":"2025-01-26T12:27:52.2694941-06:00","level":"INFO","msg":"stream: started","id":"vtej8fra"}
+{"time":"2025-01-26T12:27:52.2694941-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"vtej8fra"}
+{"time":"2025-01-26T12:27:52.3959419-06:00","level":"INFO","msg":"Starting system monitor"}
