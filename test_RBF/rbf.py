@@ -232,17 +232,22 @@ def plot_loss(show_result=False):
     plt.ylabel('Loss')
     plt.plot(loss_t_BRM.numpy())
     plt.plot(loss_t_LSTD.numpy())
+
+random_states = torch.rand(100, 4, device=device)  # Assuming 4D state space
+random_states[:, 0] = random_states[:, 0] * 9.6 - 4.8
+random_states[:, 1] = random_states[:, 1] * 20 - 10
+random_states[:, 2] = random_states[:, 2] * 0.836 - 0.418
+random_states[:, 3] = random_states[:, 3] * 20 - 10
     
 def calculate_loss(policy_net, DQN_net):
     # Calculate the loss
     loss = 0
-    for i in range(100):
-        state, info = env.reset()
-        state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-        loss += F.mse_loss(policy_net(state), DQN_net(state))
-    return loss / 100
+    with torch.no_grad():
+        policy_output = policy_net(random_states)
+        dqn_output = DQN_net(random_states)
+        loss = F.mse_loss(policy_output, dqn_output)
 
-num_episodes = 600
+num_episodes = 5000
 
 wandb.init(
     # set the wandb project where this run will be logged
