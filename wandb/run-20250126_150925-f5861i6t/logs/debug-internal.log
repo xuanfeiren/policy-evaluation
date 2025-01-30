@@ -1,0 +1,7 @@
+{"time":"2025-01-26T15:09:26.170422-06:00","level":"INFO","msg":"stream: starting","core version":"0.19.3","symlink path":"C:\\experiments\\policy-evaluation\\wandb\\run-20250126_150925-f5861i6t\\logs\\debug-core.log"}
+{"time":"2025-01-26T15:09:26.2800866-06:00","level":"INFO","msg":"created new stream","id":"f5861i6t"}
+{"time":"2025-01-26T15:09:26.2800866-06:00","level":"INFO","msg":"handler: started","stream_id":"f5861i6t"}
+{"time":"2025-01-26T15:09:26.2800866-06:00","level":"INFO","msg":"stream: started","id":"f5861i6t"}
+{"time":"2025-01-26T15:09:26.2800866-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"f5861i6t"}
+{"time":"2025-01-26T15:09:26.2800866-06:00","level":"INFO","msg":"sender: started","stream_id":"f5861i6t"}
+{"time":"2025-01-26T15:09:26.4225355-06:00","level":"INFO","msg":"Starting system monitor"}

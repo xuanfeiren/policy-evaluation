@@ -20,8 +20,8 @@ s = 5  # Size of P and Phi
 feature_dim = 2 # Feature dimension
 
 # Set random seed for reproducibility
-# seed = np.random.randint(0, 10000)
-seed = 5002 # BRM has smaller bound on this seed
+seed = np.random.randint(0, 10000)
+# seed = 5002 # BRM has smaller bound on this seed
 np.random.seed(seed)
 print(f"Random seed: {seed}")
 
@@ -49,36 +49,30 @@ for i in range(s):
 # R = np.random.uniform(-10, 10, size=(s, 1))
 
 # Create arrays to store results for different gamma values
-gamma_values = np.linspace(0, 0.99, 100)
+gamma_values = np.linspace(0.5, 0.99, 100)
 first_expr_values = []
 second_expr_values = []
 
-for gamma in gamma_values:
+gamma = 0.95
+# for gamma in gamma_values:
     # Compute M = I - gamma * P
-    I = np.eye(s)
-    M = I - gamma * P
+I = np.eye(s)
+M = I - gamma * P
 
-    # First expression: ||Φ (Φᵀ Mᵀ M Φ)⁻¹ Φᵀ Mᵀ P||_op
-    MT_M = M.T@ D @ M
-    reg_term = 1e-8 * np.eye(feature_dim)
-    Phi_MTM_Phi_inv = np.linalg.inv(Phi.T @ MT_M @ Phi + reg_term)
-    first_expr = mu_operator_norm(Phi @ Phi_MTM_Phi_inv @ Phi.T @ M.T @ D @ P, D)
-    first_expr_values.append(first_expr)
+# First expression: ||Φ (Φᵀ Mᵀ M Φ)⁻¹ Φᵀ Mᵀ P||_op
+MT_M = M.T@ D @ M
+reg_term = 1e-8 * np.eye(feature_dim)
+Phi_MTM_Phi_inv = np.linalg.inv(Phi.T @ MT_M @ Phi + reg_term)
+first_expr = mu_operator_norm(Phi @ Phi_MTM_Phi_inv @ Phi.T @ M.T @ D @ M, D)
+first_expr_values.append(first_expr)
 
-    # Second expression: ||Φ (Φᵀ M Φ)⁻¹ Φᵀ P||_op
-    reg_term = 1e-8 * np.eye(feature_dim)
-    Phi_M_Phi_inv = np.linalg.inv(Phi.T@ D @ M @ Phi + reg_term)
-    second_expr = mu_operator_norm(Phi @ Phi_M_Phi_inv @ Phi.T@ D @ P , D)
-    second_expr_values.append(second_expr)
+# Second expression: ||Φ (Φᵀ M Φ)⁻¹ Φᵀ P||_op
+reg_term = 1e-8 * np.eye(feature_dim)
+Phi_M_Phi_inv = np.linalg.inv(Phi.T@ D @ M @ Phi + reg_term)
+second_expr = mu_operator_norm(Phi @ Phi_M_Phi_inv @ Phi.T@ D @ P , D) * gamma
+second_expr_values.append(second_expr)
 
-# Plot the results
-plt.plot(gamma_values, first_expr_values, label='BRM')
-plt.plot(gamma_values, second_expr_values, label='LSTD')
-plt.xlabel('gamma')
-plt.ylabel('Operator norm')
-plt.legend()
-plt.show()
 
 # Print results
-# print("BRM  expression value:", first_expr)
-# print("LSTD expression value:", second_expr)
+print("BRM  expression value:", first_expr)
+print("LSTD expression value:", second_expr)

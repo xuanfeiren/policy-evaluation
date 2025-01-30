@@ -1,0 +1,22 @@
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_setup.py:_flush():68] Current SDK version is 0.19.3
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_setup.py:_flush():68] Configure stats pid to 10080
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_setup.py:_flush():68] Loading settings from C:\Users\xuanf\.config\wandb\settings
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_setup.py:_flush():68] Loading settings from C:\experiments\policy-evaluation\wandb\settings
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_setup.py:_flush():68] Loading settings from environment variables
+2025-01-26 15:09:25,915 INFO    MainThread:10080 [wandb_init.py:_log_setup():598] Logging user logs to C:\experiments\policy-evaluation\wandb\run-20250126_150925-f5861i6t\logs\debug.log
+2025-01-26 15:09:25,916 INFO    MainThread:10080 [wandb_init.py:_log_setup():599] Logging internal logs to C:\experiments\policy-evaluation\wandb\run-20250126_150925-f5861i6t\logs\debug-internal.log
+2025-01-26 15:09:25,916 INFO    MainThread:10080 [wandb_init.py:init():714] calling init triggers
+2025-01-26 15:09:25,916 INFO    MainThread:10080 [wandb_init.py:init():719] wandb.init called with sweep_config: {}
+config: {'num_episodes': 600}
+2025-01-26 15:09:25,916 INFO    MainThread:10080 [wandb_init.py:init():745] starting backend
+2025-01-26 15:09:26,139 INFO    MainThread:10080 [wandb_init.py:init():749] sending inform_init request
+2025-01-26 15:09:26,167 INFO    MainThread:10080 [backend.py:_multiprocessing_setup():104] multiprocessing start_methods=spawn, using: spawn
+2025-01-26 15:09:26,169 INFO    MainThread:10080 [wandb_init.py:init():764] backend started and connected
+2025-01-26 15:09:26,171 INFO    MainThread:10080 [wandb_init.py:init():857] updated telemetry
+2025-01-26 15:09:26,208 INFO    MainThread:10080 [wandb_init.py:init():889] communicating run to backend with 90.0 second timeout
+2025-01-26 15:09:26,420 INFO    MainThread:10080 [wandb_init.py:init():941] starting run threads in backend
+2025-01-26 15:09:26,590 INFO    MainThread:10080 [wandb_run.py:_console_start():2420] atexit reg
+2025-01-26 15:09:26,590 INFO    MainThread:10080 [wandb_run.py:_redirect():2270] redirect: wrap_raw
+2025-01-26 15:09:26,591 INFO    MainThread:10080 [wandb_run.py:_redirect():2335] Wrapping output streams.
+2025-01-26 15:09:26,591 INFO    MainThread:10080 [wandb_run.py:_redirect():2360] Redirects installed.
+2025-01-26 15:09:26,594 INFO    MainThread:10080 [wandb_init.py:init():983] run started, returning control to user process

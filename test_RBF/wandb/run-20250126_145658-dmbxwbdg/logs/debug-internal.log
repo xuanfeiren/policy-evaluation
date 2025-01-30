@@ -7,3 +7,5 @@
 {"time":"2025-01-26T14:56:59.1171841-06:00","level":"INFO","msg":"Starting system monitor"}
 {"time":"2025-01-26T14:57:29.1176564-06:00","level":"ERROR","msg":"monitor: memory: error sampling metrics: The parameter is incorrect."}
 {"time":"2025-01-26T14:57:29.1240079-06:00","level":"ERROR","msg":"monitor: cpu: error sampling metrics: could not get CreationDate: The parameter is incorrect.\ncouldn't find pid: 22508"}
+{"time":"2025-01-26T15:02:44.4485085-06:00","level":"ERROR","msg":"HTTP error","status":404,"method":"POST","url":"https://api.wandb.ai/files/xuanfeiren-university-of-wisconsin-madison/test_RBF/dmbxwbdg/file_stream"}
+{"time":"2025-01-26T15:02:44.4485085-06:00","level":"ERROR+4","msg":"filestream: fatal error: filestream: failed to upload: 404 Not Found path=files/xuanfeiren-university-of-wisconsin-madison/test_RBF/dmbxwbdg/file_stream: {\"error\":\"run test_RBF/dmbxwbdg not found while streaming file\"}"}
