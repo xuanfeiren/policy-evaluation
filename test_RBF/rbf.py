@@ -51,48 +51,49 @@ DQN_net.load_state_dict(torch.load("policy_net.pth", weights_only=True))
 
 
 def policy_DQN(state):
-    if not isinstance(state, torch.Tensor):
-        state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-    actions = DQN_net(state)
-    action = actions.max(1)[1].view(1, 1)
+    with torch.no_grad():
+        if not isinstance(state, torch.Tensor):
+            state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+        actions = DQN_net(state)
+        action = actions.max(1)[1].view(1, 1)
     return action
 
-class FeatureExtractor(nn.Module):
-    def __init__(self, dqn_net):
-        super(FeatureExtractor, self).__init__()
-        # Copy first two layers and ReLU
-        self.layer1 = dqn_net.layer1
-        self.layer2 = dqn_net.layer2
+# class FeatureExtractor(nn.Module):
+#     def __init__(self, dqn_net):
+#         super(FeatureExtractor, self).__init__()
+#         # Copy first two layers and ReLU
+#         self.layer1 = dqn_net.layer1
+#         self.layer2 = dqn_net.layer2
         
-        # Freeze weights
-        for param in self.parameters():
-            param.requires_grad = False
+#         # Freeze weights
+#         for param in self.parameters():
+#             param.requires_grad = False
     
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.layer2(x))
-        return x
+#     def forward(self, x):
+#         x = F.relu(self.layer1(x))
+#         x = F.relu(self.layer2(x))
+#         return x
 
-feature_mapping = FeatureExtractor(DQN_net)
-class Linear_model(nn.Module):
-    def __init__(self, n_observations, n_actions):
-        super(Linear_model, self).__init__()
-        # Copy all layers except last from DQN_net
-        self.feature_mapping = feature_mapping
-        # Freeze feature mapping weights
-        for param in self.feature_mapping.parameters():
-            param.requires_grad = False
+# feature_mapping = FeatureExtractor(DQN_net)
+# class Linear_model(nn.Module):
+#     def __init__(self, n_observations, n_actions):
+#         super(Linear_model, self).__init__()
+#         # Copy all layers except last from DQN_net
+#         self.feature_mapping = feature_mapping
+#         # Freeze feature mapping weights
+#         for param in self.feature_mapping.parameters():
+#             param.requires_grad = False
             
-        # Get feature dimension from last layer
-        feature_dim = 128
-        self.linear = nn.Linear(feature_dim, n_actions, bias=False)
+#         # Get feature dimension from last layer
+#         feature_dim = 128
+#         self.linear = nn.Linear(feature_dim, n_actions, bias=False)
 
-    def forward(self, x):
-        x = self.feature_mapping(x)
-        return self.linear(x)
+#     def forward(self, x):
+#         x = self.feature_mapping(x)
+#         return self.linear(x)
     
-    def init(self):
-        nn.init.zeros_(self.linear.weight)
+#     def init(self):
+#         nn.init.zeros_(self.linear.weight)
 
 class RBFNet(nn.Module):
     def __init__(self, input_size, output_size):
@@ -225,12 +226,7 @@ def optimize_models():
     torch.nn.utils.clip_grad_value_(policy_net_LSTD.parameters(), 100)
     optimizer_LSTD.step()
 
-# set up matplotlib
-is_ipython = 'inline' in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
 
-plt.ion()
 
 episode_loss_BRM = []
 episode_loss_LSTD = []
@@ -245,35 +241,78 @@ def plot_loss(show_result=False):
     plt.plot(loss_t_BRM.numpy())
     plt.plot(loss_t_LSTD.numpy())
 
-
+num_test_states = 100
 states_list = []
-for _ in range(100):
+for _ in range(num_test_states):
     state, _ = env.reset()
     states_list.append(state)
-states = torch.tensor(states_list, dtype=torch.float32, device=device)
+states_array = np.array(states_list)
+states = torch.tensor(states_array, dtype=torch.float32, device=device)
 
-def calculate_loss(policy_net, DQN_net):
+def calculate_mc_return(state, num_trajectories=1, max_steps=1000):
+    '''environment and policy are deterministic, so one trajectory is enough'''
+    n_actions = env.action_space.n  # CartPole action space
+    total_returns = np.zeros(n_actions)
+    
+    for action_idx in range(n_actions):
+        action_return = 0
+        for _ in range(num_trajectories):
+            s0 , _ = env.reset()
+            trajectory_return = 0
+            # a = env.unwrapped.state
+            env.unwrapped.state = state
+            # b = env.unwrapped.state
+            current_state = state
+            
+            # First action is fixed
+            next_state, reward, terminated, truncated, _ = env.step(action_idx)
+            trajectory_return += reward
+            
+            # Continue with DQN policy after first step
+            if not (terminated or truncated):
+                current_state = next_state
+                for step in range(1, max_steps):
+                    state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)
+                    
+                    next_action = policy_DQN(state_tensor)
+                    next_state, reward, terminated, truncated, _ = env.step(next_action.item())
+                    trajectory_return += GAMMA ** step * reward
+                    
+                    if terminated or truncated:
+                        break
+                    current_state = next_state
+            
+            action_return += trajectory_return
+        
+        total_returns[action_idx] = action_return / num_trajectories
+    
+    return torch.tensor(total_returns, dtype=torch.float32, device=device)
+
+# Calculate expected returns for all initial states
+expected_returns = []
+for state in states_list:
+    mc_return = calculate_mc_return(state)  # Returns 2D vector
+    expected_returns.append(mc_return)
+expected_returns = torch.stack(expected_returns)  # Shape: [100, 2]
+
+def calculate_loss(policy_net):
     # Calculate the loss
     total_loss = 0
     with torch.no_grad():
-        for state in states:
+        for state, mc_return in zip(states, expected_returns):
             # Process single state
             state = state.unsqueeze(0)  # Add batch dimension
             policy_output = policy_net(state)
-            dqn_output = DQN_net(state)
             
-            # Accumulate loss
-            loss = F.mse_loss(policy_output, dqn_output)
+            loss = F.mse_loss(policy_output.squeeze(0), mc_return)
             total_loss += loss
-            
-    
-    return total_loss / 100
+    return total_loss / num_test_states
 
 num_episodes = 6000
 
 wandb.init(
     # set the wandb project where this run will be logged
-    project="test_RBF",
+    project="test_RBF-with-trajectory-return",
 
     # track hyperparameters and run metadata
     config={
@@ -310,8 +349,8 @@ for i_episode in tqdm(range(num_episodes)):
             target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
         target_net_LSTD.load_state_dict(target_net_state_dict)
         if done:
-            loss_BRM = calculate_loss(policy_net_BRM, DQN_net).item()
-            loss_LSTD = calculate_loss(policy_net_LSTD, DQN_net).item()
+            loss_BRM = calculate_loss(policy_net_BRM).item()
+            loss_LSTD = calculate_loss(policy_net_LSTD).item()
             episode_loss_BRM.append(loss_BRM)
             episode_loss_LSTD.append(loss_LSTD)
             
@@ -326,7 +365,7 @@ for i_episode in tqdm(range(num_episodes)):
     
 print('Complete')
 plot_loss(show_result=True)
-plt.ioff()
+
 plt.show()
 # plt.savefig("loss_CartPole-v1.png")
 wandb.finish()

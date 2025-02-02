@@ -185,9 +185,9 @@ def plot_loss(show_result=False):
     plt.ylabel('Loss')
     plt.plot(loss_t_LSTD.numpy())
 
-
+num_test_states = 100
 states_list = []
-for _ in range(100):
+for _ in range(num_test_states):
     state, _ = env.reset()
     states_list.append(state)
 states_array = np.array(states_list)
@@ -240,7 +240,7 @@ for state in states_list:
 expected_returns = torch.stack(expected_returns)  # Shape: [100, 2]
 
 
-def calculate_loss(policy_net, DQN_net):
+def calculate_loss(policy_net):
     # Calculate the loss
     total_loss = 0
     with torch.no_grad():
@@ -248,13 +248,10 @@ def calculate_loss(policy_net, DQN_net):
             # Process single state
             state = state.unsqueeze(0)  # Add batch dimension
             policy_output = policy_net(state)
-            # dqn_output = DQN_net(state)
-            # Accumulate loss
+            
             loss = F.mse_loss(policy_output.squeeze(0), mc_return)
             total_loss += loss
-            
-    
-    return total_loss / 100
+    return total_loss / num_test_states
 
 num_episodes = 6000
 
@@ -297,8 +294,8 @@ for i_episode in tqdm(range(num_episodes)):
             target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
         target_net_LSTD.load_state_dict(target_net_state_dict)
         if done:
-            # loss_BRM = calculate_loss(policy_net_BRM, DQN_net).item()
-            loss_LSTD = calculate_loss(policy_net_LSTD, DQN_net).item()
+            # loss_BRM = calculate_loss(policy_net_BRM).item()
+            loss_LSTD = calculate_loss(policy_net_LSTD).item()
             # episode_loss_BRM.append(loss_BRM)
             episode_loss_LSTD.append(loss_LSTD)
             
