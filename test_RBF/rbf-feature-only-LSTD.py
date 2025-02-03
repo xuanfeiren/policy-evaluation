@@ -9,7 +9,6 @@ from itertools import count
 from collections import namedtuple, deque
 from tqdm import tqdm
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import wandb
 from sklearn.kernel_approximation import RBFSampler
@@ -118,8 +117,9 @@ class ReplayMemory(object):
     def __len__(self):
         return len(self.memory)
 
-memory = ReplayMemory(10000)
-BATCH_SIZE = 128
+memory_size = int(1e6)
+memory = ReplayMemory(memory_size)
+BATCH_SIZE = 256
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
@@ -166,24 +166,8 @@ def optimize_models():
     torch.nn.utils.clip_grad_value_(policy_net_LSTD.parameters(), 100)
     optimizer_LSTD.step()
 
-# set up matplotlib
-# is_ipython = 'inline' in matplotlib.get_backend()
-# if is_ipython:
-#     from IPython import display
 
-# plt.ion()
-
-# episode_loss_BRM = []
 episode_loss_LSTD = []
-
-def plot_loss(show_result=False):
-    plt.figure(1)
-    # loss_t_BRM = torch.tensor(episode_loss_BRM, dtype=torch.float)
-    loss_t_LSTD = torch.tensor(episode_loss_LSTD, dtype=torch.float)
-    plt.title('CartPole-v1')
-    plt.xlabel('Episode')
-    plt.ylabel('Loss')
-    plt.plot(loss_t_LSTD.numpy())
 
 num_test_states = 100
 states_list = []
@@ -193,7 +177,7 @@ for _ in range(num_test_states):
 states_array = np.array(states_list)
 states = torch.tensor(states_array, dtype=torch.float32, device=device)
 
-def calculate_mc_return(state, num_trajectories=1, max_steps=1000):
+def calculate_mc_return(state, num_trajectories=1, max_steps=400):
     '''environment and policy are deterministic, so one trajectory is enough'''
     n_actions = env.action_space.n  # CartPole action space
     total_returns = np.zeros(n_actions)
@@ -253,20 +237,15 @@ def calculate_loss(policy_net):
             total_loss += loss
     return total_loss / num_test_states
 
-num_episodes = 6000
 
-wandb.init(
-    # set the wandb project where this run will be logged
-    project="tune_RBF-only-LSTD",
 
-    # track hyperparameters and run metadata
-    config={
-    "num_episodes": num_episodes,
-    }
-)
+
 TAU = 1
-for i_episode in tqdm(range(num_episodes)):
-    # Initialize the environment and get its state
+
+num_collect_data = 5000
+print("Collecting data...")
+for i_collect_data in tqdm(range(num_collect_data)):
+    '''data collecting process'''
     state, info = env.reset()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
     for t in count():
@@ -274,42 +253,38 @@ for i_episode in tqdm(range(num_episodes)):
         observation, reward, terminated, truncated, _ = env.step(action.item())
         reward = torch.tensor([reward], device=device)
         done = terminated or truncated
-
         if terminated:
             next_state = None
         else:
             next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
-
-        # Store the transition in memory
         memory.push(state, action, next_state, reward)
-
-        # Move to the next state
         state = next_state
-
-        # Perform one step of the optimization (on the policy network)
-        optimize_models()
-        target_net_state_dict = target_net_LSTD.state_dict()
-        policy_net_state_dict = policy_net_LSTD.state_dict()
-        for key in policy_net_state_dict:
-            target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
-        target_net_LSTD.load_state_dict(target_net_state_dict)
         if done:
-            # loss_BRM = calculate_loss(policy_net_BRM).item()
-            loss_LSTD = calculate_loss(policy_net_LSTD).item()
-            # episode_loss_BRM.append(loss_BRM)
-            episode_loss_LSTD.append(loss_LSTD)
-            
-
-            wandb.log({
-               "Episode": i_episode,
-                # "Loss/BRM": loss_BRM,
-                "Loss/LSTD": loss_LSTD,
-            })
-            
             break
-    
-print('Complete')
-plot_loss(show_result=True)
-# plt.ioff()
-plt.show()
+print("Done collecting", len(memory), " data.")
+
+print("Training...")
+num_episodes = 6000
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="tune_RBF-only-LSTD-separate-data-and-training",
+
+    # track hyperparameters and run metadata
+    config={
+    "num_episodes": num_episodes,
+    }
+)
+for i_episode in tqdm(range(num_episodes)):
+    optimize_models()
+    target_net_state_dict = target_net_LSTD.state_dict()
+    policy_net_state_dict = policy_net_LSTD.state_dict()
+    for key in policy_net_state_dict:
+        target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
+    target_net_LSTD.load_state_dict(target_net_state_dict)
+    loss_LSTD = calculate_loss(policy_net_LSTD).item()
+    episode_loss_LSTD.append(loss_LSTD)
+    wandb.log({
+        "Episode": i_episode,
+        "Loss/LSTD": loss_LSTD,
+    })
 wandb.finish()
