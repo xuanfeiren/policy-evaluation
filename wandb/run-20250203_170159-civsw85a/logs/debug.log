@@ -20,3 +20,10 @@ config: {'num_episodes': 6000}
 2025-02-03 17:02:00,503 INFO    MainThread:19180 [wandb_run.py:_redirect():2335] Wrapping output streams.
 2025-02-03 17:02:00,503 INFO    MainThread:19180 [wandb_run.py:_redirect():2360] Redirects installed.
 2025-02-03 17:02:00,508 INFO    MainThread:19180 [wandb_init.py:init():983] run started, returning control to user process
+2025-02-03 17:12:02,693 INFO    MainThread:19180 [wandb_run.py:_finish():2145] finishing run xuanfeiren-university-of-wisconsin-madison/tune_RBF-only-LSTD-separate-data-and-training/civsw85a
+2025-02-03 17:12:02,693 INFO    MainThread:19180 [wandb_run.py:_atexit_cleanup():2385] got exitcode: 0
+2025-02-03 17:12:02,693 INFO    MainThread:19180 [wandb_run.py:_restore():2367] restore
+2025-02-03 17:12:02,693 INFO    MainThread:19180 [wandb_run.py:_restore():2373] restore done
+2025-02-03 17:12:04,257 INFO    MainThread:19180 [wandb_run.py:_footer_history_summary_info():3987] rendering history
+2025-02-03 17:12:04,257 INFO    MainThread:19180 [wandb_run.py:_footer_history_summary_info():4019] rendering summary
+2025-02-03 17:12:04,258 INFO    MainThread:19180 [wandb_run.py:_footer_sync_info():3948] logging synced files

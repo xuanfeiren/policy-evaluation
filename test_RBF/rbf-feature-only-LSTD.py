@@ -119,7 +119,7 @@ class ReplayMemory(object):
 
 memory_size = int(1e6)
 memory = ReplayMemory(memory_size)
-BATCH_SIZE = 256
+BATCH_SIZE = 512
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
@@ -237,12 +237,9 @@ def calculate_loss(policy_net):
             total_loss += loss
     return total_loss / num_test_states
 
-
-
-
 TAU = 1
 
-num_collect_data = 5000
+num_collect_data = 4000
 print("Collecting data...")
 for i_collect_data in tqdm(range(num_collect_data)):
     '''data collecting process'''
@@ -264,7 +261,7 @@ for i_collect_data in tqdm(range(num_collect_data)):
 print("Done collecting", len(memory), " data.")
 
 print("Training...")
-num_episodes = 6000
+num_episodes = int(1e5)
 wandb.init(
     # set the wandb project where this run will be logged
     project="tune_RBF-only-LSTD-separate-data-and-training",
