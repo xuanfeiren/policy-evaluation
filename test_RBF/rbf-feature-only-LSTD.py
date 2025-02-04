@@ -75,10 +75,6 @@ class RBFNet(nn.Module):
         feature_np = self.rbf_feature.fit_transform(x_np)
         feature = torch.tensor(feature_np, dtype=torch.float).to(self.device)
         output = self.linear(feature)
-        
-        # If input was single sample, squeeze output
-        # if x_np.shape[0] == 1:
-        #     output = output.squeeze(0)
             
         return output
         
@@ -119,7 +115,7 @@ class ReplayMemory(object):
 
 memory_size = int(1e6)
 memory = ReplayMemory(memory_size)
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
@@ -239,7 +235,7 @@ def calculate_loss(policy_net):
 
 TAU = 1
 
-num_collect_data = 4000
+num_collect_data = 40
 print("Collecting data...")
 for i_collect_data in tqdm(range(num_collect_data)):
     '''data collecting process'''
