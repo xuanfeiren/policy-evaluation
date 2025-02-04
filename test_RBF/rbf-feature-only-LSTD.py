@@ -119,7 +119,7 @@ class ReplayMemory(object):
 
 memory_size = int(1e6)
 memory = ReplayMemory(memory_size)
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
