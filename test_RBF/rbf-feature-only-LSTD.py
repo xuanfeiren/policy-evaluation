@@ -274,10 +274,11 @@ for i_episode in tqdm(range(num_episodes)):
     for key in policy_net_state_dict:
         target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
     target_net_LSTD.load_state_dict(target_net_state_dict)
-    loss_LSTD = calculate_loss(policy_net_LSTD).item()
-    episode_loss_LSTD.append(loss_LSTD)
-    wandb.log({
-        "Episode": i_episode,
-        "Loss/LSTD": loss_LSTD,
-    })
+    if i_episode % 1000 == 0:
+        loss_LSTD = calculate_loss(policy_net_LSTD).item()
+        episode_loss_LSTD.append(loss_LSTD)
+        wandb.log({
+            "Episode": i_episode,
+            "Loss/LSTD": loss_LSTD,
+        })
 wandb.finish()
