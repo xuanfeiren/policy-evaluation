@@ -4,3 +4,4 @@
 {"time":"2025-02-03T17:17:32.6434376-06:00","level":"INFO","msg":"handler: started","stream_id":"h5sw77ky"}
 {"time":"2025-02-03T17:17:32.6434376-06:00","level":"INFO","msg":"writer: Do: started","stream_id":"h5sw77ky"}
 {"time":"2025-02-03T17:17:32.6434376-06:00","level":"INFO","msg":"sender: started","stream_id":"h5sw77ky"}
+{"time":"2025-02-03T17:17:34.0252749-06:00","level":"INFO","msg":"Starting system monitor"}
