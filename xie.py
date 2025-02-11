@@ -195,7 +195,7 @@ def compare_networks(env, num_episodes=500, num_runs=5):
         'decay': 200,
         'lr': 0.001,
         'capacity': 10000,
-        'batch_size': 64,
+        'batch_size': 128,
         'state_space_dim': env.observation_space.shape[0],
         'action_space_dim': env.action_space.n,
         'device': device
@@ -259,4 +259,4 @@ def compare_networks(env, num_episodes=500, num_runs=5):
 
 # Run comparison
 env = gym.make('CartPole-v0')
-compare_networks(env, num_episodes=2000, num_runs=1)
+compare_networks(env, num_episodes=4000, num_runs=1)

@@ -9,7 +9,7 @@ from itertools import count
 from collections import namedtuple, deque
 from tqdm import tqdm
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import wandb
 from sklearn.kernel_approximation import RBFSampler
 
@@ -75,6 +75,7 @@ class RBFNet(nn.Module):
         feature_np = self.rbf_feature.fit_transform(x_np)
         feature = torch.tensor(feature_np, dtype=torch.float).to(self.device)
         output = self.linear(feature)
+            
         return output
         
     def init(self):
@@ -112,7 +113,7 @@ class ReplayMemory(object):
     def __len__(self):
         return len(self.memory)
 
-memory_size = int(1e6)
+memory_size = int(1e4)
 memory = ReplayMemory(memory_size)
 BATCH_SIZE = 128
 GAMMA = 0.99
@@ -164,6 +165,7 @@ def optimize_models():
 
 episode_loss_LSTD = []
 
+print("Evaluating testing states...")
 num_test_states = 100
 states_list = []
 for _ in range(num_test_states):
@@ -217,7 +219,7 @@ for state in states_list:
     mc_return = calculate_mc_return(state)  # Returns 2D vector
     expected_returns.append(mc_return)
 expected_returns = torch.stack(expected_returns)  # Shape: [100, 2]
-
+print("Done evaluating testing states.")
 
 def calculate_loss(policy_net):
     # Calculate the loss
@@ -232,7 +234,7 @@ def calculate_loss(policy_net):
 
 TAU = 1
 
-num_collect_data = 4000
+num_collect_data = 40
 print("Collecting data...")
 for i_collect_data in tqdm(range(num_collect_data)):
     '''data collecting process'''
@@ -269,12 +271,14 @@ for i_episode in tqdm(range(num_episodes)):
     target_net_state_dict = target_net_LSTD.state_dict()
     policy_net_state_dict = policy_net_LSTD.state_dict()
     for key in policy_net_state_dict:
-        target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
+        # target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
+        target_net_state_dict[key] = policy_net_state_dict[key]
     target_net_LSTD.load_state_dict(target_net_state_dict)
-    loss_LSTD = calculate_loss(policy_net_LSTD).item()
-    episode_loss_LSTD.append(loss_LSTD)
-    wandb.log({
-        "Episode": i_episode,
-        "Loss/LSTD": loss_LSTD,
-    })
+    if i_episode % 10000 == 0:
+        loss_LSTD = calculate_loss(policy_net_LSTD).item()
+        episode_loss_LSTD.append(loss_LSTD)
+        wandb.log({
+            "Episode": i_episode,
+            "Loss/LSTD": loss_LSTD,
+        })
 wandb.finish()
