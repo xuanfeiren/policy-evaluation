@@ -210,6 +210,7 @@ def optimize_models():
     state_action_values_LSTD = policy_net_LSTD(state_batch).gather(1, action_batch)
     next_state_values_LSTD = torch.zeros(BATCH_SIZE, device=device)
     with torch.no_grad():
+        '''Here may be some bugs. The next_state_values_LSTD should use the policy instead of maximization'''
         next_state_values_LSTD[non_final_mask] = target_net_LSTD(non_final_next_states).max(1).values #in dqn
         
     # Get next actions using policy_DQN

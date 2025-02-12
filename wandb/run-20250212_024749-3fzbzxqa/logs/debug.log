@@ -1,0 +1,8 @@
+2025-02-12 02:47:49,437 INFO    MainThread:16940 [wandb_init.py:_log_setup():598] Logging user logs to c:\experiments\policy-evaluation\wandb\run-20250212_024749-3fzbzxqa\logs\debug.log
+2025-02-12 02:47:49,437 INFO    MainThread:16940 [wandb_init.py:_log_setup():599] Logging internal logs to c:\experiments\policy-evaluation\wandb\run-20250212_024749-3fzbzxqa\logs\debug-internal.log
+2025-02-12 02:47:49,437 INFO    MainThread:16940 [wandb_init.py:init():714] calling init triggers
+2025-02-12 02:47:49,437 INFO    MainThread:16940 [wandb_init.py:init():719] wandb.init called with sweep_config: {}
+config: {'num_episodes': 100000}
+2025-02-12 02:47:49,437 INFO    MainThread:16940 [wandb_init.py:init():740] wandb.init() called when a run is still active
+2025-02-12 02:47:49,442 INFO    MainThread:16940 [jupyter.py:save_ipynb():386] not saving jupyter notebook
+2025-02-12 02:47:49,443 INFO    MainThread:16940 [wandb_init.py:_pause_backend():515] pausing backend

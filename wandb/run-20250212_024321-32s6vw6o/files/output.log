@@ -1,0 +1,39 @@
+  0%|          | 0/100000 [00:00<?, ?it/s]
+c:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\gymnasium\envs\registration.py:517: DeprecationWarning: [33mWARN: The environment CartPole-v0 is out of date. You should consider upgrading to version `v1`.[0m
+  logger.deprecation(
+Evaluating testing states...
+Done evaluating testing states.
+Collecting data...
+100%|██████████| 40/40 [00:10<00:00,  3.99it/s]
+Done collecting 8000  data.
+Training...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+c:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\gymnasium\envs\registration.py:517: DeprecationWarning: [33mWARN: The environment CartPole-v0 is out of date. You should consider upgrading to version `v1`.[0m
+  logger.deprecation(
+Evaluating testing states...
+Done evaluating testing states.
+Collecting data...
+100%|██████████| 40/40 [00:11<00:00,  3.55it/s]
+Done collecting 8000  data.
+Training...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+c:\Users\xuanf\miniconda3\envs\policy-eval\Lib\site-packages\gymnasium\envs\registration.py:517: DeprecationWarning: [33mWARN: The environment CartPole-v0 is out of date. You should consider upgrading to version `v1`.[0m
+  logger.deprecation(
+Evaluating testing states...
+Done evaluating testing states.
+Collecting data...
+100%|██████████| 40/40 [00:11<00:00,  3.59it/s]
+Done collecting 8000  data.
+Training...
+  0%|          | 0/100000 [00:00<?, ?it/s]
+  0%|          | 0/100000 [00:00<?, ?it/s]
+  0%|          | 0/100000 [00:00<?, ?it/s]
+  0%|          | 0/100000 [00:00<?, ?it/s]
+  0%|          | 0/100000 [00:00<?, ?it/s]
+5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d6.29.55dc3a68c-e34e-4080-9c3e-2a532b2ccb4d
+  0%|          | 0/100000 [01:01<?, ?it/s]
+5dc3a68c-e34e-4080-9c3e-2a532b2ccb4d6.29.55dc3a68c-e34e-4080-9c3e-2a532b2ccb4d
+  0%|          | 0/100000 [00:06<?, ?it/s]
+  0%|          | 0/100000 [00:00<?, ?it/s]
+  0%|          | 372/100000 [01:07<4:59:50,  5.54it/s]
+  1%|          | 810/100000 [02:26<4:59:59,  5.51it/s]
